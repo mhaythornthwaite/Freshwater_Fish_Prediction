@@ -126,3 +126,5 @@ dmypy.json
 # Working Data to Ignore
 **/misc/**
 **/data/**
+**/google-images-download/**
+**/papers/**

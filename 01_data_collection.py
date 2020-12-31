@@ -20,8 +20,7 @@ from google_images_download import google_images_download   #importing the libra
 
 #15 species of freshwater fish have been chosen in the list below. Initially, 100 images are collected. This will then be manually filtered, removing erranous or misrepresenative images manually.
 
-#fish_species = 'Roach fish, Rudd fish, Bream, Common Carp, Mirror Carp, Tench, Perch, Pike, Barbel, Chub, Gudgeon, Rainbow Trout, Brown Trout, Salmon, Grayling'
-fish_species = 'Common Bream'
+fish_species = 'Roach fish,Rudd fish,Common Bream,Common Carp,Mirror Carp,Tench,Perch,Pike,Barbel,Chub,Gudgeon,Rainbow Trout,Brown Trout,Grayling'
 
 response = google_images_download.googleimagesdownload()   #class instantiation
 

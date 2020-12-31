@@ -6,3 +6,4 @@ scikit-learn==0.23.1
 pickleshare==0.7.5
 seaborn==0.10.1
 google_images_download==2.8.0
+pillow==8.0.1

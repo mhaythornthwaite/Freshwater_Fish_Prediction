@@ -19,7 +19,12 @@
 <h3> Workplan </h3>
 
 <p>
-	In this project data will be collected from google images. Around 100 images will initially be collected per class, however, more may need to be collected after initial model evaluation. Approximately 10/15 species of fish will be trained to begin with, with more classes added if necessary.
+	In this project data will be collected from google images. Between 50 - 100 images will initially be collected per class, however, more may need to be collected after initial model evaluation. Approximately 10/15 species of fish will be trained to begin with, with more classes added if necessary.
 
 </p>
 
+<h4> Data </h4>
+
+<p>
+	Raw data and lebels can be downloaded [here](https://drive.google.com/drive/folders/1Sah-IcSeIR8jjLbR2qDgj3RnovsHxEq3?usp=sharing)
+</p>

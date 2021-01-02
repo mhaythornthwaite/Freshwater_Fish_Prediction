@@ -96,3 +96,4 @@ def rename_files(fish_species, input_path, input_dir, file_already_exisits=True)
             continue
         os.rename(src, dst)
     
+    

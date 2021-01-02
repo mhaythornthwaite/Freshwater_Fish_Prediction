@@ -16,6 +16,7 @@ start=time.time()
 from fish_functions import img_to_jpg, rename_files
 import os
 import pandas as pd
+import numpy as np
 import pickle
 
 
@@ -41,8 +42,17 @@ for input_dir in input_dirs:
         
 labels_df = labels_df.reset_index(drop=True)
 
-with open('data/labels', 'wb') as myFile:
+with open('data_labels/labels', 'wb') as myFile:
     pickle.dump(labels_df, myFile)
+
+
+#turning every sample into a boolean array and then turning the boolean array into a binary array (or a vector filled with zeros and a single 1), using list comprehension.
+species = np.unique(labels_df['Class'])
+boolean_labels = [label == species for label in labels_df['Class']]
+boolean_labels_int = [label.astype(int) for label in boolean_labels]
+
+with open('data_labels/one_hot_labels', 'wb') as myFile:
+    pickle.dump(boolean_labels_int, myFile)
 
 
 # ----------------------------------- END -------------------------------------

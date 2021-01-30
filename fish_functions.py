@@ -10,6 +10,7 @@ import os
 from PIL import Image
 import random
 import string
+import tensorflow as tf
 
 
 def get_random_string(length):
@@ -95,5 +96,37 @@ def rename_files(fish_species, input_path, input_dir, file_already_exisits=True)
         if src == dst:
             continue
         os.rename(src, dst)
+
+
+def proc_img(im_path, img_size=224):
+    '''
+    Takes an image path, reads the image, converts to a tensor (dtype), resizes to img_size*img_size, before returning the 'image' sensor.
+
+    Parameters
+    ----------
+    im_path : str
+        path to the image.
+    img_size : int, optional
+        width and height of the output tensor. The default is 224.
+
+    Returns
+    -------
+    im : tensor
+        reformated image as tensor in standard size.
+
+    '''
     
+    #loading image to variable
+    im = tf.io.read_file(im_path)
+    
+    #modify im variable to tensor with 3 channels (RGB)
+    im = tf.image.decode_jpeg(im, channels=3)
+    
+    #feature scaling - we're using normalisation (0 -> 1) but we could use standardisation (mean = 0, var = 1) 
+    im = tf.image.convert_image_dtype(im, tf.float32)
+    
+    #resize the image - all images will be the same size and hence have the same number of features (pixels)
+    im = tf.image.resize(im, size=[img_size, img_size])
+    
+    return im
     

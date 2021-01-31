@@ -22,7 +22,9 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
 from fish_functions import proc_img
+import fish_functions as ff
 
 
 #-------------------------- CHECKING TF VERSION AND GPU -----------------------
@@ -50,26 +52,44 @@ with open('data_labels/label_paths', 'rb') as myFile:
     
 #------------------------------- INPUT VARIABLES ------------------------------
 
-#number of images gone into our training + validation set, set to 1011 to use full dataset
-num_images = 500
+image_size = (224, 224)
+batch_size = 32
 
 
-#------------------------------- DATA PREPARATION -----------------------------
-  
-X = label_paths
-y = one_hot_labels
+#---------------------------------- MODEL BUILD -------------------------------
 
-#experimenting will start off with a largely trimmed version of the dataset, ~500 images instead of 1011. This will speed up the inital testing/experimentation
+#in this basic model build from scratch we will use the image_dataset_from_directory keras function, which will create our tf.data.dataset for us without the need to label our data. Labels are assumed from the directory they are in which is consistent with our data structure. The labels are label encoded with an integer id, not one hot encoding. It also organises our data into batches.
 
-X_train, X_val, y_train, y_val = train_test_split(X[:num_images], 
-                                                  y[:num_images], 
-                                                  test_size = 0.2, 
-                                                  random_state = 42)
+train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    "data",
+    validation_split=0.2,
+    subset="training",
+    seed=1337,
+    image_size=image_size,
+    batch_size=batch_size)
 
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    "data",
+    validation_split=0.2,
+    subset="validation",
+    seed=1337,
+    image_size=image_size,
+    batch_size=batch_size)
 
-test = proc_img(label_paths[0])
-test.shape
-t2 = test.numpy()
+#takes the first batch in the dataset
+train_batch = train_ds.take(1)
+
+#inspecting the object it is formed of two objects of shape ((None, 224, 224, 3), (None,))
+train_batch
+
+#accessing the two 'objects' in the dataset can be achieved with the in statement
+plt.figure(figsize=(16, 8))
+for images, labels in train_batch:
+    for i in range(32):
+        ax = plt.subplot(4, 8, i + 1)
+        plt.imshow(images[i].numpy().astype("uint8"))
+        plt.title(int(labels[i]))
+        plt.axis("off")
 
 
 # ----------------------------------- END -------------------------------------

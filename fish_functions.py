@@ -129,4 +129,39 @@ def proc_img(im_path, img_size=224):
     im = tf.image.resize(im, size=[img_size, img_size])
     
     return im
+
+
+def get_methods(object, spacing=20):
+    '''
+    Prints the methods available for a definted instantiated object
+
+    Parameters
+    ----------
+    object : any
+        object for inspection.
+    spacing : int, optional
+        print spacing. The default is 20.
+
+    Returns
+    -------
+    print to the console.
+
+    '''
+  
+    methodList = []
+    for method_name in dir(object):
+      try:
+          if callable(getattr(object, method_name)):
+              methodList.append(str(method_name))
+      except:
+          methodList.append(str(method_name))
+    processFunc = (lambda s: ' '.join(s.split())) or (lambda s: s)
+    for method in methodList:
+      try:
+          print(str(method.ljust(spacing)) + ' ' +
+                processFunc(str(getattr(object, method).__doc__)[0:90]))
+      except:
+          print(method.ljust(spacing) + ' ' + ' getattr() failed')
+
+
     

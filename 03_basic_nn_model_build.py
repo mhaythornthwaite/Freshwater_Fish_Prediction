@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 from fish_functions import proc_img
 import fish_functions as ff
 
+plt.close('all')
 
 #-------------------------- CHECKING TF VERSION AND GPU -----------------------
 
@@ -56,6 +57,7 @@ with open('data_labels/label_paths', 'rb') as myFile:
 
 image_size = (224, 224)
 batch_size = 32
+num_classes = 14
 
 
 #----------------------------------- DATA PREP --------------------------------
@@ -77,6 +79,10 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     seed=1337,
     image_size=image_size,
     batch_size=batch_size)
+
+#buffered prefetching
+train_ds = train_ds.prefetch(buffer_size=32)
+val_ds = val_ds.prefetch(buffer_size=32)
 
 #the above functions create a label encoded result of (img, id). The id is simply the order of the folders presented. Therefore we can create a {class: id} dictionary so we understand the meaning of the id.
 id_class = dict(zip(list(range(14)), os.listdir('data')))
@@ -105,19 +111,109 @@ for images, labels in train_batch:
 
 #---------- DATA AUGMENTATION ----------
 
+#
 data_augmentation = keras.Sequential([
         layers.experimental.preprocessing.RandomFlip("horizontal"),
         layers.experimental.preprocessing.RandomRotation(0.1)])
 
 fig2 = plt.figure(figsize=(10, 10))
 fig2.suptitle('Data Augmentation on a Single Image', y=0.94, fontsize=16, fontweight='bold');
-for images, _ in train_ds.take(1):
+for image, _ in train_ds.take(2):
     for i in range(9):
-        augmented_images = data_augmentation(images)
+        augmented_image = data_augmentation(image)
         ax = plt.subplot(3, 3, i + 1)
-        plt.imshow(augmented_images[0].numpy().astype("uint8"))
+        plt.imshow(augmented_image[0].numpy().astype("uint8"))
         plt.axis("off")
 
+data_augmentation.summary()
+
+
+
+#---------------------------------- MODEL BUILD -------------------------------
+
+simple_model = keras.Sequential([
+    layers.Dense(224, activation='relu', name='layer1'),
+    layers.Dense(112, activation='relu', name='layer2'),
+    layers.Dense(64, activation='relu', name='layer3'),
+    layers.Dense(14, activation='softmax', name='layer4')
+    ])
+    
+simple_model.compile(loss='categorical_crossentropy',
+                     optimizer=keras.optimizers.Adam(),
+                     metrics=["accuracy"]
+                     )
+
+simple_model.build(image_size)
+
+simple_model.summary()
+
+
+def complex_model(input_shape, num_classes):
+    inputs = keras.Input(shape=input_shape)
+    # Image augmentation block
+    x = data_augmentation(inputs)
+
+    # Entry block
+    x = layers.experimental.preprocessing.Rescaling(1.0 / 255)(x)
+    x = layers.Conv2D(32, 3, strides=2, padding="same")(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+
+    x = layers.Conv2D(64, 3, padding="same")(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+
+    previous_block_activation = x  # Set aside residual
+
+    for size in [128, 256, 512, 728]:
+        x = layers.Activation("relu")(x)
+        x = layers.SeparableConv2D(size, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Activation("relu")(x)
+        x = layers.SeparableConv2D(size, 3, padding="same")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
+
+        # Project residual
+        residual = layers.Conv2D(size, 1, strides=2, padding="same")(
+            previous_block_activation
+        )
+        x = layers.add([x, residual])  # Add back residual
+        previous_block_activation = x  # Set aside next residual
+
+    x = layers.SeparableConv2D(1024, 3, padding="same")(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+
+    x = layers.GlobalAveragePooling2D()(x)
+    if num_classes == 2:
+        activation = "sigmoid"
+        units = 1
+    else:
+        activation = "softmax"
+        units = num_classes
+
+    x = layers.Dropout(0.5)(x)
+    outputs = layers.Dense(units, activation=activation)(x)
+    return keras.Model(inputs, outputs)
+
+#intantiate the model
+model = complex_model(input_shape=image_size + (3,), num_classes=2)
+
+#training the model
+epochs = 10
+
+callbacks = [keras.callbacks.ModelCheckpoint("save_at_{epoch}.h5")]
+
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001),
+              loss="categorical_crossentropy",
+              metrics=["accuracy"])
+ 
+model.summary() 
+
+model.fit(train_ds, epochs=epochs, callbacks=callbacks, validation_data=val_ds)
 
 
 

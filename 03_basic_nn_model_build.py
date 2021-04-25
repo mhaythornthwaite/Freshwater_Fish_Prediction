@@ -25,19 +25,12 @@ import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from fish_functions import open_jpeg_as_np
+from fish_functions import open_jpeg_as_np, print_tf_setup
 
 plt.close('all')
 
-#-------------------------- CHECKING TF VERSION AND GPU -----------------------
-
 #note that to allow tensorflow to be compatible with the GPU cudnn==7.6.4 was installed in the environment. 
-
-print(' ---------------------------------------\n                 TF SETUP\n')
-physical_devices = tf.config.list_physical_devices('GPU')
-print('TF Version:', tf.__version__, '\nTF Hub Version:', hub.__version__, '\n')
-print(f'{len(physical_devices)} GPU is available' if physical_devices else 'GPU is not available')
-print(' ---------------------------------------\n')
+print_tf_setup()
 
 
 #--------------------------------- DATA LOADING -------------------------------
@@ -68,6 +61,8 @@ im = open_jpeg_as_np(label_paths[0], image_size)
 
 #plotting test image, is the class recognisable with the current downsampling?
 plt.imshow(im, cmap='gray', vmin=0, vmax=255)
+
+
 
 
 

@@ -11,6 +11,7 @@ from PIL import Image
 import random
 import string
 import tensorflow as tf
+import tensorflow_hub as hub
 import numpy as np
 
 
@@ -191,4 +192,20 @@ def get_methods(object, spacing=20):
           print(method.ljust(spacing) + ' ' + ' getattr() failed')
 
 
+def print_tf_setup():
+    '''
+    Prints information on the tf setup to the console.
+
+    Returns
+    -------
+    None.
+
+    '''
     
+    print(' ---------------------------------------\n                 TF SETUP\n')
+    physical_devices = tf.config.list_physical_devices('GPU')
+    print('TF Version:', tf.__version__, '\nTF Hub Version:', hub.__version__, '\n')
+    print(f'{len(physical_devices)} GPU is available' if physical_devices else 'GPU is not available')
+    print(' ---------------------------------------\n')
+    
+    return None

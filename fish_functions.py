@@ -11,6 +11,7 @@ from PIL import Image
 import random
 import string
 import tensorflow as tf
+import numpy as np
 
 
 def get_random_string(length):
@@ -96,6 +97,32 @@ def rename_files(fish_species, input_path, input_dir, file_already_exisits=True)
         if src == dst:
             continue
         os.rename(src, dst)
+
+
+def open_jpeg_as_np(path, image_size):
+    '''
+    takes the path of a jpeg file, re-sizes, converts to grayscale and outputs a np array
+
+    Parameters
+    ----------
+    path : string
+        path to the image.
+    image_size : tuple
+        2D-tuple: (width, height).
+
+    Returns
+    -------
+    im : array
+        np array of the input image.
+
+    '''
+    
+    im = Image.open(path)
+    im = im.resize(image_size)
+    im = im.convert('L')
+    im = np.asarray(im)
+    
+    return im
 
 
 def proc_img(im_path, img_size=224):

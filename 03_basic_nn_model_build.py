@@ -25,7 +25,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from fish_functions import open_jpeg_as_np, print_tf_setup
+from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array
 
 plt.close('all')
 
@@ -51,6 +51,9 @@ image_size = (64, 64)
 batch_size = 32
 num_classes = 14
 
+image_vector_len = image_size[0] * image_size[1]
+num_images = len(labels)
+
 
 #----------------------------------- DATA PREP --------------------------------
 
@@ -62,8 +65,8 @@ im = open_jpeg_as_np(label_paths[0], image_size)
 #plotting test image, is the class recognisable with the current downsampling?
 plt.imshow(im, cmap='gray', vmin=0, vmax=255)
 
-
-
+#loading all our data to a np array
+data_array = gen_data_array(label_paths, image_size)
 
 
 #---------------------------------- MODEL BUILD -------------------------------

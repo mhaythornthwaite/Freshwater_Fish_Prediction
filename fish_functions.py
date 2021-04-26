@@ -126,6 +126,39 @@ def open_jpeg_as_np(path, image_size):
     return im
 
 
+def gen_data_array(label_paths, image_size):
+    '''
+    takes labels from a list, loads to np array, reshaes to image_size, converts to vector and appends toa data array. 
+
+    Parameters
+    ----------
+    label_paths : list
+        relative paths to the data.
+    image_size : tuple
+        2D-tuple: (width, height).
+
+    Returns
+    -------
+    data_array : np array
+        data loaded to a np array.
+
+    '''
+    
+    #creating required variables.
+    image_vector_len = image_size[0] * image_size[1]
+    num_images = len(label_paths)
+    
+    #instantiating our np array with zeros, speeds up writing data to this array in the for loop.
+    data_array = np.zeros(shape=(num_images, image_vector_len))
+
+    for i, path in enumerate(label_paths):
+        im = open_jpeg_as_np(path, image_size)
+        im_vector = np.reshape(im, image_vector_len)
+        data_array[i] = im_vector
+        
+    return data_array
+
+
 def proc_img(im_path, img_size=224):
     '''
     Takes an image path, reads the image, converts to a tensor (dtype), resizes to img_size*img_size, before returning the 'image' sensor.

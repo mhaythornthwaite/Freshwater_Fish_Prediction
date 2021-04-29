@@ -59,36 +59,34 @@ num_images = len(labels)
 
 #in this basic model build from scratch we need to write some functions that will load our data into a numpy array. As we are begining with a basic model build we will need to convert our 2D image matrics into 1D image vectors. We have variable images sizes which will need to be normalised to a single size, and likely downsampled in most cases as we only have around 1000 samples. The size of the input image will be tested as a hyperparameter. 
 
-#opening a test image
+#opening a test image and plotting to see if the class recognisable with the current downsampling
 im = open_jpeg_as_np(label_paths[0], image_size)
-
-#plotting test image, is the class recognisable with the current downsampling?
 plt.imshow(im, cmap='gray', vmin=0, vmax=255)
 
-#loading all our data to a np array
+#loading all our data to a np array, and train test split
 data_array = gen_data_array(label_paths, image_size)
+train_images, test_images, train_labels, test_labels = train_test_split(data_array, one_hot_labels, test_size=0.2)
 
 
 #---------------------------------- MODEL BUILD -------------------------------
-'''
+
 simple_model = keras.Sequential([
-    layers.Dense(224, activation='relu', name='layer1'),
-    layers.Dense(112, activation='relu', name='layer2'),
-    layers.Dense(64, activation='relu', name='layer3'),
-    layers.Dense(14, activation='softmax', name='layer4')
+    layers.Dense(256, activation='relu', name='layer1', input_shape=(image_vector_len,)),
+    layers.Dense(64, activation='relu', name='layer2'),
+    layers.Dense(14, activation='softmax', name='layer3'),
     ])
-    
+ 
 simple_model.compile(loss='categorical_crossentropy',
                      optimizer=keras.optimizers.Adam(),
                      metrics=["accuracy"]
                      )
 
-simple_model.build(image_size)
-
 simple_model.summary()
 
-https://www.youtube.com/watch?v=J6Ok8p463C4
-'''
+#simple_model.fit(train_images, train_labels, epochs=5, batch_size=32)
+
+#https://www.youtube.com/watch?v=J6Ok8p463C4
+
 
 # ----------------------------------- END -------------------------------------
 

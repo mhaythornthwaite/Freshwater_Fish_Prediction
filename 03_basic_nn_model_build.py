@@ -83,7 +83,7 @@ simple_model.compile(loss='categorical_crossentropy',
 
 simple_model.summary()
 
-#simple_model.fit(train_images, train_labels, epochs=5, batch_size=32)
+simple_model.fit(train_images, train_labels, epochs=5, batch_size=batch_size)
 
 #https://www.youtube.com/watch?v=J6Ok8p463C4
 

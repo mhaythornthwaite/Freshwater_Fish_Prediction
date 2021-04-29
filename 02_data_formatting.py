@@ -56,12 +56,19 @@ species = np.unique(labels_df['Class'])
 boolean_labels = [label == species for label in labels_df['Class']]
 boolean_labels_int = [label.astype(int) for label in boolean_labels]
 
-with open('data_labels/one_hot_labels', 'wb') as myFile:
-    pickle.dump(boolean_labels_int, myFile)
+#converting our bool labels into a np array
+num_images = len(boolean_labels_int)
+num_class = len(species)
 
-
+boolean_labels_int_array = np.zeros(shape=(num_images, num_class))
+for i, label in enumerate(boolean_labels_int):
+    boolean_labels_int_array[i] = label
         
 
+with open('data_labels/one_hot_labels', 'wb') as myFile:
+    pickle.dump(boolean_labels_int_array, myFile)
+
+      
 
 # ----------------------------------- END -------------------------------------
 

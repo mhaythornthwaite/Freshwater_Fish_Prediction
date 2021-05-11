@@ -113,24 +113,50 @@ fig.suptitle('Training & Validation Loss', y=0.95, fontsize=16, fontweight='bold
 ax2 = ax.twinx()
 
 #plotting training and validation loss
-train_loss = ax.plot(epochs, loss_values, 'r', label='Training Loss')
-val_loss = ax2.plot(epochs, val_loss, 'b', label='Validation Loss')
+train_loss_line = ax.plot(epochs, loss_values, 'r', label='Training Loss')
+val_loss_line = ax2.plot(epochs, val_loss, 'b', label='Validation Loss')
 
 #setting axis limits
 ax.set_ylim([min(loss_values)-0.2, 2.8])
 ax2.set_ylim([min(val_loss)-1, min(val_loss)+10])
 
 #plotting legend
-lns = train_loss + val_loss
+lns = train_loss_line + val_loss_line
 labs = [l.get_label() for l in lns]
 ax.legend(lns, labs, loc=0)
+
+#plotting axis labels
+ax.set_xlabel('Epochs')
+ax.set_ylabel('Training Loss')
+ax2.set_ylabel('Validation Loss')
 
 train_predictions = simple_model.predict(train_images[:100])
 
 
+#--------- TRAINING & VALIDATION ACCURACY ---------
+
+#setting up plottable variables
+accuracy_values = history_dict['accuracy']
+val_accuracy = history_dict['val_accuracy']
+
+#fig setup including twin axis
+fig2, ax = plt.subplots()
+fig2.suptitle('Training & Validation Accuracy', y=0.95, fontsize=16, fontweight='bold')
+
+#plotting training and validation loss
+ax.plot(epochs, accuracy_values, 'r', label='Training Accuracy')
+ax.plot(epochs, val_accuracy, 'b', label='Validation Accuracy')
+
+#setting axis limits
+ax.set_ylim([0,1])
+
+#plotting legend
+ax.legend()
+ax.set(xlabel='Epochs',
+       ylabel='Accuracy');
+
 
 #https://www.youtube.com/watch?v=J6Ok8p463C4
-
 
 # ----------------------------------- END -------------------------------------
 

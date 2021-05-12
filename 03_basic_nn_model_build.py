@@ -47,7 +47,7 @@ with open('data_labels/label_paths', 'rb') as myFile:
     
 #------------------------------- INPUT VARIABLES ------------------------------
 
-image_size = (64, 64)
+image_size = (32, 32)
 batch_size = 32
 num_classes = 14
 
@@ -70,18 +70,20 @@ train_images, test_images, train_labels, test_labels = train_test_split(data_arr
 #train_images = train_images[:100]
 #train_labels = train_labels[:100]
 
+
 #---------------------------------- MODEL BUILD -------------------------------
 
 simple_model = keras.Sequential([
     layers.Dense(192, activation='relu', name='layer1', input_shape=(image_vector_len,)),
-    layers.Dense(48, activation='relu', name='layer2'),
-    layers.Dense(14, activation='softmax', name='layer3'),
+    layers.Dense(96, activation='relu', name='layer2'),
+    layers.Dense(48, activation='relu', name='layer3'),
+    layers.Dense(14, activation='softmax', name='layer4'),
     ])
 
 #full list of keras optimisers: https://keras.io/api/optimizers/
 #low learning rate: https://stackoverflow.com/questions/41488279/neural-network-always-predicts-the-same-class
-optimiser = keras.optimizers.Adam(learning_rate=0.00001)
-optimiser = keras.optimizers.RMSprop(learning_rate=0.00001)
+optimiser = keras.optimizers.Adam(learning_rate=0.0001)
+#optimiser = keras.optimizers.RMSprop(learning_rate=0.00001)
 
 simple_model.compile(loss='categorical_crossentropy',
                      optimizer=optimiser,
@@ -90,9 +92,9 @@ simple_model.compile(loss='categorical_crossentropy',
 
 simple_model.summary()
 
-history = simple_model.fit(train_images, 
+clf = simple_model.fit(train_images, 
                            train_labels, 
-                           epochs=1000, 
+                           epochs=250, 
                            batch_size=batch_size,
                            validation_data=(test_images, test_labels))
 
@@ -102,7 +104,7 @@ history = simple_model.fit(train_images,
 #--------- TRAINING & VALIDATION LOSS ---------
 
 #setting up plottable variables
-history_dict = history.history
+history_dict = clf.history
 loss_values = history_dict['loss']
 val_loss = history_dict['val_loss']
 epochs = list(range(1, len(loss_values)+1))
@@ -113,12 +115,13 @@ fig.suptitle('Training & Validation Loss', y=0.95, fontsize=16, fontweight='bold
 ax2 = ax.twinx()
 
 #plotting training and validation loss
-train_loss_line = ax.plot(epochs, loss_values, 'r', label='Training Loss')
-val_loss_line = ax2.plot(epochs, val_loss, 'b', label='Validation Loss')
+train_loss_line = ax.plot(epochs, loss_values, 'b', label='Training Loss')
+val_loss_line = ax2.plot(epochs, val_loss, 'r', label='Validation Loss')
+val_hline = ax2.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
 #setting axis limits
-ax.set_ylim([min(loss_values)-0.2, 2.8])
-ax2.set_ylim([min(val_loss)-1, min(val_loss)+10])
+ax.set_ylim([min(loss_values)-0.5, min(loss_values)+2])
+ax2.set_ylim([min(val_loss)-0.5, min(val_loss)+2])
 
 #plotting legend
 lns = train_loss_line + val_loss_line
@@ -131,7 +134,7 @@ ax.set_ylabel('Training Loss')
 ax2.set_ylabel('Validation Loss')
 
 train_predictions = simple_model.predict(train_images[:100])
-
+val_predictions = simple_model.predict(test_images[:100])
 
 #--------- TRAINING & VALIDATION ACCURACY ---------
 
@@ -144,11 +147,13 @@ fig2, ax = plt.subplots()
 fig2.suptitle('Training & Validation Accuracy', y=0.95, fontsize=16, fontweight='bold')
 
 #plotting training and validation loss
-ax.plot(epochs, accuracy_values, 'r', label='Training Accuracy')
-ax.plot(epochs, val_accuracy, 'b', label='Validation Accuracy')
+ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')
+ax.plot(epochs, val_accuracy, 'r', label='Validation Accuracy')
+ax.axhline(max(val_accuracy), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
+ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
 
 #setting axis limits
-ax.set_ylim([0,1])
+ax.set_ylim([0,max(accuracy_values)+0.1])
 
 #plotting legend
 ax.legend()

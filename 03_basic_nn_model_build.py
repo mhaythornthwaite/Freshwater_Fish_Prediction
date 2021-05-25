@@ -94,7 +94,7 @@ simple_model.summary()
 
 clf = simple_model.fit(train_images, 
                            train_labels, 
-                           epochs=250, 
+                           epochs=100, 
                            batch_size=batch_size,
                            validation_data=(test_images, test_labels))
 

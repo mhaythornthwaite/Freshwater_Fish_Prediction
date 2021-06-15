@@ -156,7 +156,7 @@ def open_jpeg_as_np(path, image_size, vectorize=True):
     return im
 
 
-def gen_data_array(label_paths, image_size):
+def gen_data_array_vector(label_paths, image_size):
     '''
     takes labels from a list, loads to np array, reshaes to image_size, converts to vector and appends toa data array. 
 
@@ -185,6 +185,45 @@ def gen_data_array(label_paths, image_size):
         im = open_jpeg_as_np(path, image_size)
         im_vector = np.reshape(im, image_vector_len)
         data_array[i] = im_vector
+        
+    return data_array
+
+
+def gen_data_array_image(label_paths, image_size, RGB=True):
+    '''
+    takes labels from a list, loads to np array, reshapes to image_size and appends toa data array. 
+
+    Parameters
+    ----------
+    label_paths : list
+        relative paths to the data.
+    image_size : tuple
+        2D-tuple: (width, height).
+    RGB : bool, optional
+        Number of channels set to 3 when rbg is set to true. The default is True.
+
+    Returns
+    -------
+    data_array : np array
+        data loaded to a np array.
+
+    '''
+    
+    #creating required variables.
+    num_images = len(label_paths) 
+    
+    if RGB:
+        im_shape = image_size + (3,)
+        data_array_shape = (num_images,) + im_shape
+    else:
+        data_array_shape = (num_images,) + image_size
+    
+    #instantiating our np array with zeros, speeds up writing data to this array in the for loop.
+    data_array = np.zeros(shape=data_array_shape)
+
+    for i, path in enumerate(label_paths):
+        im = open_jpeg_as_np(path, image_size, vectorize=False)
+        data_array[i] = im
         
     return data_array
 

@@ -13,7 +13,7 @@ print('\n\n ---------------- START ---------------- \n')
 import time
 start=time.time()
 
-from fish_functions import img_to_jpg, rename_files
+from fish_functions import img_to_jpg, rename_files, check_rgb
 import os
 import pandas as pd
 import numpy as np
@@ -28,6 +28,7 @@ input_dirs = os.listdir(input_path)
 #iterating over all the fish species directories, converting to .jpg and renaming to a common naming convention
 for input_dir in input_dirs:
     img_to_jpg(input_path, input_dir)
+    check_rgb(input_path, input_dir)
     rename_files(input_dir, input_path, input_dir)
 
 

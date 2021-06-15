@@ -25,7 +25,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array
+from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_vector
 
 plt.close('all')
 
@@ -64,7 +64,7 @@ im = open_jpeg_as_np(label_paths[0], image_size)
 plt.imshow(im, cmap='gray', vmin=0, vmax=255)
 
 #loading all our data to a np array, and train test split
-data_array = gen_data_array(label_paths, image_size)
+data_array = gen_data_array_vector(label_paths, image_size)
 train_images, test_images, train_labels, test_labels = train_test_split(data_array, one_hot_labels, test_size=0.2)
 
 #train_images = train_images[:100]

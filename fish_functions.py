@@ -61,6 +61,33 @@ def img_to_jpg(input_path, input_dir):
             rgb_im.save(f'{input_full}/{im_name}.jpg')
             im.close()
             os.remove(f'{input_full}/{img}')
+ 
+        
+def check_rgb(input_path, input_dir):
+    '''
+    checks that the jpg is formatted as an RBG by checking the number of channels is equal to 3. If not the data is deleted
+
+    Parameters
+    ----------
+    input_path : string
+        absolute path to the directory of the data.
+    input_dir : string
+        additional optional sub-directory - useful for iterating over directories.
+        
+    '''
+    
+    input_full = input_path + input_dir
+    dir_items = os.listdir(input_full)
+    
+    for i, img in enumerate(dir_items):
+        im = Image.open(f'{input_full}/{img}')
+        im = np.asarray(im)
+        im_shape = im.shape
+        im_channels = im_shape[-1]
+        
+        if im_channels != 3:
+            os.remove(f'{input_full}/{img}')
+    
         
     
 def rename_files(fish_species, input_path, input_dir, file_already_exisits=True):
@@ -100,7 +127,7 @@ def rename_files(fish_species, input_path, input_dir, file_already_exisits=True)
         os.rename(src, dst)
 
 
-def open_jpeg_as_np(path, image_size):
+def open_jpeg_as_np(path, image_size, vectorize=True):
     '''
     takes the path of a jpeg file, re-sizes, converts to grayscale and outputs a np array
 
@@ -110,6 +137,8 @@ def open_jpeg_as_np(path, image_size):
         path to the image.
     image_size : tuple
         2D-tuple: (width, height).
+    vectorize : TYPE, optional
+        output n array will be vector. The default is True.        
 
     Returns
     -------
@@ -120,7 +149,8 @@ def open_jpeg_as_np(path, image_size):
     
     im = Image.open(path)
     im = im.resize(image_size)
-    im = im.convert('L')
+    if vectorize:
+        im = im.convert('L')
     im = np.asarray(im)
     
     return im

@@ -47,7 +47,8 @@ with open('data_labels/label_paths', 'rb') as myFile:
     
 #------------------------------- INPUT VARIABLES ------------------------------
 
-image_size = (128, 128)
+image_size = (32, 32)
+input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
 
@@ -57,7 +58,7 @@ num_images = len(labels)
 
 #----------------------------------- DATA PREP --------------------------------
 
-#in this basic model build from scratch we need to write some functions that will load our data into a numpy array. As we are begining with a basic model build we will need to convert our 2D image matrics into 1D image vectors. We have variable images sizes which will need to be normalised to a single size, and likely downsampled in most cases as we only have around 1000 samples. The size of the input image will be tested as a hyperparameter. 
+#in this basic convolutional model build from scratch we need to write some functions that will load our data into a numpy array. We have variable images sizes which will need to be normalised to a single size, and likely downsampled in most cases as we only have around 1000 samples. The size of the input image will be tested as a hyperparameter. We will retain the 3 colour channels so our data array will be as follows (#samples, #x pixels, #y pixels, #channels)
 
 #opening a test image and plotting to see if the class recognisable with the current downsampling.
 im = open_jpeg_as_np(label_paths[0], image_size, vectorize=False)
@@ -67,6 +68,98 @@ plt.imshow(im, vmin=0, vmax=255)
 data_array = gen_data_array_image(label_paths, image_size)
 train_images, test_images, train_labels, test_labels = train_test_split(data_array, one_hot_labels, test_size=0.2)
 
+
+#---------------------------------- MODEL BUILD -------------------------------
+
+simple_convnet_model = keras.Sequential([
+    layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3,3), activation='relu', input_shape=input_shape),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3,3), activation='relu', input_shape=input_shape),
+    layers.Flatten(),
+    layers.Dense(32, activation='relu'),
+    layers.Dense(14, activation='softmax'),
+    ])
+
+optimiser = keras.optimizers.Adam(learning_rate=0.0001)
+
+simple_convnet_model.compile(loss='categorical_crossentropy',
+                             optimizer=optimiser,
+                             metrics=["accuracy"]
+                             )
+
+simple_convnet_model.summary()
+
+clf = simple_convnet_model.fit(train_images, 
+                               train_labels, 
+                               epochs=250, 
+                               batch_size=batch_size,
+                               validation_data=(test_images, test_labels))
+
+
+#------------------------------- MODEL PERFORMANCE ----------------------------
+
+#--------- TRAINING & VALIDATION LOSS ---------
+
+#setting up plottable variables
+history_dict = clf.history
+loss_values = history_dict['loss']
+val_loss = history_dict['val_loss']
+epochs = list(range(1, len(loss_values)+1))
+
+#fig setup including twin axis
+fig, ax = plt.subplots()
+fig.suptitle('Training & Validation Loss', y=0.95, fontsize=16, fontweight='bold')
+ax2 = ax.twinx()
+
+#plotting training and validation loss
+train_loss_line = ax.plot(epochs, loss_values, 'b', label='Training Loss')
+val_loss_line = ax2.plot(epochs, val_loss, 'r', label='Validation Loss')
+val_hline = ax2.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+
+#setting axis limits
+ax.set_ylim([min(loss_values)-0.5, min(loss_values)+6])
+ax2.set_ylim([min(val_loss)-0.5, min(val_loss)+6])
+
+#plotting legend
+lns = train_loss_line + val_loss_line
+labs = [l.get_label() for l in lns]
+ax.legend(lns, labs, loc=0)
+
+#plotting axis labels
+ax.set_xlabel('Epochs')
+ax.set_ylabel('Training Loss')
+ax2.set_ylabel('Validation Loss')
+
+train_predictions = simple_convnet_model.predict(train_images[:100])
+val_predictions = simple_convnet_model.predict(test_images[:100])
+
+#--------- TRAINING & VALIDATION ACCURACY ---------
+
+#setting up plottable variables
+accuracy_values = history_dict['accuracy']
+val_accuracy = history_dict['val_accuracy']
+
+#fig setup including twin axis
+fig2, ax = plt.subplots()
+fig2.suptitle('Training & Validation Accuracy', y=0.95, fontsize=16, fontweight='bold')
+
+#plotting training and validation loss
+ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')
+ax.plot(epochs, val_accuracy, 'r', label='Validation Accuracy')
+ax.axhline(max(val_accuracy), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
+ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
+
+#setting axis limits
+ax.set_ylim([0,max(accuracy_values)+0.1])
+
+#plotting legend
+ax.legend()
+ax.set(xlabel='Epochs',
+       ylabel='Accuracy');
+
+#https://stats.stackexchange.com/questions/282160/how-is-it-possible-that-validation-loss-is-increasing-while-validation-accuracy
 
 
 # ----------------------------------- END -------------------------------------

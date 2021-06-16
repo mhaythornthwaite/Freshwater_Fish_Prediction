@@ -213,8 +213,7 @@ def gen_data_array_image(label_paths, image_size, RGB=True):
     num_images = len(label_paths) 
     
     if RGB:
-        im_shape = image_size + (3,)
-        data_array_shape = (num_images,) + im_shape
+        data_array_shape = (num_images, image_size[1], image_size[0], 3)
     else:
         data_array_shape = (num_images,) + image_size
     

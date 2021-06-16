@@ -93,7 +93,7 @@ simple_convnet_model.summary()
 
 clf = simple_convnet_model.fit(train_images, 
                                train_labels, 
-                               epochs=150, 
+                               epochs=100, 
                                batch_size=batch_size,
                                validation_data=(test_images, test_labels))
 
@@ -113,10 +113,9 @@ fig, ax = plt.subplots()
 fig.suptitle('Training & Validation Loss Basic Convnet', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
-train_loss_line = ax.plot(epochs, loss_values, 'b', label='Training Loss')
-
-val_loss_line = ax.plot(epochs, val_loss, 'r', label='Validation Loss')
-val_hline = ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+ax.plot(epochs, loss_values, 'b', label='Training Loss')
+ax.plot(epochs, val_loss, 'r', label='Validation Loss')
+ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
 #setting axis limits
 ax.set_ylim([min(loss_values)-0.5, min(loss_values)+8])
@@ -126,7 +125,7 @@ ax.legend()
 
 #plotting axis labels
 ax.set_xlabel('Epochs')
-ax.set_ylabel('Training Loss')
+ax.set_ylabel('Loss')
 
 train_predictions = simple_convnet_model.predict(train_images[:100])
 val_predictions = simple_convnet_model.predict(test_images[:100])

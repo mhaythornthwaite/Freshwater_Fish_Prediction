@@ -78,7 +78,7 @@ simple_convnet_model = keras.Sequential([
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(64, (3,3), activation='relu', input_shape=input_shape),
     layers.Flatten(),
-    layers.Dense(32, activation='relu'),
+    layers.Dense(64, activation='relu'),
     layers.Dense(14, activation='softmax'),
     ])
 
@@ -93,7 +93,7 @@ simple_convnet_model.summary()
 
 clf = simple_convnet_model.fit(train_images, 
                                train_labels, 
-                               epochs=250, 
+                               epochs=150, 
                                batch_size=batch_size,
                                validation_data=(test_images, test_labels))
 
@@ -110,27 +110,23 @@ epochs = list(range(1, len(loss_values)+1))
 
 #fig setup including twin axis
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss', y=0.95, fontsize=16, fontweight='bold')
-ax2 = ax.twinx()
+fig.suptitle('Training & Validation Loss Basic Convnet', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
 train_loss_line = ax.plot(epochs, loss_values, 'b', label='Training Loss')
-val_loss_line = ax2.plot(epochs, val_loss, 'r', label='Validation Loss')
-val_hline = ax2.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+
+val_loss_line = ax.plot(epochs, val_loss, 'r', label='Validation Loss')
+val_hline = ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
 #setting axis limits
-ax.set_ylim([min(loss_values)-0.5, min(loss_values)+6])
-ax2.set_ylim([min(val_loss)-0.5, min(val_loss)+6])
+ax.set_ylim([min(loss_values)-0.5, min(loss_values)+8])
 
 #plotting legend
-lns = train_loss_line + val_loss_line
-labs = [l.get_label() for l in lns]
-ax.legend(lns, labs, loc=0)
+ax.legend()
 
 #plotting axis labels
 ax.set_xlabel('Epochs')
 ax.set_ylabel('Training Loss')
-ax2.set_ylabel('Validation Loss')
 
 train_predictions = simple_convnet_model.predict(train_images[:100])
 val_predictions = simple_convnet_model.predict(test_images[:100])
@@ -143,7 +139,7 @@ val_accuracy = history_dict['val_accuracy']
 
 #fig setup including twin axis
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy', y=0.95, fontsize=16, fontweight='bold')
+fig2.suptitle('Training & Validation Accuracy Basic Convnet', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
 ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')

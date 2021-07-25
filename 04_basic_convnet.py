@@ -51,8 +51,6 @@ input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
 
-regularise = False
-
 image_vector_len = image_size[0] * image_size[1]
 num_images = len(labels)
 
@@ -72,27 +70,16 @@ train_images, test_images, train_labels, test_labels = train_test_split(data_arr
 
 #---------------------------------- MODEL BUILD -------------------------------
 
-#---------- MODEL ARCHITECTURE ----------
-
-#building convolutional base
 model = keras.Sequential([
     layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3,3), activation='relu', input_shape=input_shape),
+    layers.Conv2D(64, (3,3), activation='relu'),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3,3), activation='relu', input_shape=input_shape),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
+    layers.Dense(14, activation='softmax')
     ])
-
-#adding densely connected classifier
-model.add(layers.Flatten())
-if regularise: 
-    model.add(layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'))
-else:
-    model.add(layers.Dense(64, activation='relu'))
-model.add(layers.Dense(14, activation='softmax'))
-
-
-#---------- COMILATION & FITTING ----------
 
 optimiser = keras.optimizers.Adam(learning_rate=0.0001)
 model.compile(loss='categorical_crossentropy',

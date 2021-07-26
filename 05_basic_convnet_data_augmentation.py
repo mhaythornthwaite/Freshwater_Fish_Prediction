@@ -99,13 +99,12 @@ model.compile(loss='categorical_crossentropy',
 
 model.summary()
 
-history = model.fit_generator(train_generator,
-                              steps_per_epoch=steps_per_epoch,
-                              epochs=100,
-                              validation_data=test_generator,
-                              validation_steps=9)
+clf = model.fit_generator(train_generator,
+                          steps_per_epoch=steps_per_epoch,
+                          epochs=250,
+                          validation_data=test_generator,
+                          validation_steps=9)
 
-clf = history
 
 #------------------------------- MODEL PERFORMANCE ----------------------------
 

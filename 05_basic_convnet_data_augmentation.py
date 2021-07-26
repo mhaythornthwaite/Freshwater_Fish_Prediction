@@ -91,7 +91,7 @@ model.add(layers.Dense(64, activation='relu'))
 model.add(layers.Dense(14, activation='softmax'))
 
 
-optimiser = keras.optimizers.Adam(learning_rate=0.0001)
+optimiser = keras.optimizers.Adam(learning_rate=0.0005)
 
 model.compile(loss='categorical_crossentropy',
               optimizer=optimiser,
@@ -101,7 +101,7 @@ model.summary()
 
 clf = model.fit_generator(train_generator,
                           steps_per_epoch=steps_per_epoch,
-                          epochs=250,
+                          epochs=100,
                           validation_data=test_generator,
                           validation_steps=9)
 
@@ -118,7 +118,7 @@ epochs = list(range(1, len(loss_values)+1))
 
 #fig setup including twin axis
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss Basic Convnet', y=0.95, fontsize=14, fontweight='bold')
+fig.suptitle('Training & Validation Loss Data Aug Convnet', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
 ax.plot(epochs, loss_values, 'b', label='Training Loss')
@@ -126,7 +126,7 @@ ax.plot(epochs, val_loss, 'r', label='Validation Loss')
 ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
 #setting axis limits
-ax.set_ylim([min(loss_values)-0.5, min(loss_values)+1])
+ax.set_ylim([min(loss_values)-0.25, min(loss_values)+1.55])
 
 #plotting legend
 ax.legend()
@@ -143,7 +143,7 @@ val_accuracy = history_dict['val_accuracy']
 
 #fig setup including twin axis
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy Basic Convnet', y=0.95, fontsize=14, fontweight='bold')
+fig2.suptitle('Training & Validation Accuracy Data Aug Convnet', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
 ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')

@@ -20,6 +20,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, regularizers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications import VGG16
 import pandas as pd
 import numpy as np
 import pickle
@@ -81,85 +82,37 @@ steps_per_val_epoch = test_generator.__len__()
 
 #---------------------------------- MODEL BUILD -------------------------------
 
+#here we have two different options, we can run the convolutional base over the training images and use hese as direct inputs to a dense classification network. This may be reffered to as fast feature extraction and is computationally cheap. Or we can set the conv base as non-trainable adding a dense classifier on top, simply called feature extraction. This technique allows for data augmentation in the training stage but we have to run the entire dataset through the conv base for every epoch, therefore is much slower and more computationally exensive. Since we have a GPU we're going with option two to benefit from data augmentation.
+
+conv_base = VGG16(weights='imagenet',
+                  include_top=False,
+                  input_shape=input_shape)
+
+conv_base.summary()
+
 model = keras.Sequential()
-model.add(layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape))
-model.add(layers.MaxPooling2D((2, 2)))
-model.add(layers.Conv2D(64, (3,3), activation='relu'))       
-model.add(layers.MaxPooling2D((2, 2)))
-model.add(layers.Conv2D(64, (3,3), activation='relu'))
+model.add(conv_base)
 model.add(layers.Flatten())
-model.add(layers.Dense(64, activation='relu'))
+model.add(layers.Dense(128, activation='relu'))
 model.add(layers.Dense(14, activation='softmax'))
+
+conv_base.trainable = False
+model.summary()
 
 optimiser = keras.optimizers.Adam(learning_rate=0.0005)
 model.compile(loss='categorical_crossentropy',
               optimizer=optimiser,
               metrics=["accuracy"])
 
-model.summary()
-
 clf = model.fit_generator(train_generator,
                           steps_per_epoch=steps_per_train_epoch,
-                          epochs=100,
+                          epochs=10,
                           validation_data=test_generator,
                           validation_steps=steps_per_val_epoch)
-
-
-#------------------------------- MODEL PERFORMANCE ----------------------------
-
-#--------- TRAINING & VALIDATION LOSS ---------
-
-#setting up plottable variables
-history_dict = clf.history
-loss_values = history_dict['loss']
-val_loss = history_dict['val_loss']
-epochs = list(range(1, len(loss_values)+1))
-
-#fig setup including twin axis
-fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss Data Aug Convnet', y=0.95, fontsize=14, fontweight='bold')
-
-#plotting training and validation loss
-ax.plot(epochs, loss_values, 'b', label='Training Loss')
-ax.plot(epochs, val_loss, 'r', label='Validation Loss')
-ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
-
-#setting axis limits
-ax.set_ylim([min(loss_values)-0.25, min(loss_values)+1.55])
-
-#plotting legend
-ax.legend()
-
-#plotting axis labels
-ax.set_xlabel('Epochs')
-ax.set_ylabel('Loss')
-
-#--------- TRAINING & VALIDATION ACCURACY ---------
-
-#setting up plottable variables
-accuracy_values = history_dict['accuracy']
-val_accuracy = history_dict['val_accuracy']
-
-#fig setup including twin axis
-fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy Data Aug Convnet', y=0.95, fontsize=14, fontweight='bold')
-
-#plotting training and validation loss
-ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')
-ax.plot(epochs, val_accuracy, 'r', label='Validation Accuracy')
-ax.axhline(max(val_accuracy), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
-ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
-
-#setting axis limits
-ax.set_ylim([0,max(accuracy_values)+0.1])
-
-#plotting legend
-ax.legend()
-ax.set(xlabel='Epochs',
-       ylabel='Accuracy');
 
 
 # ----------------------------------- END -------------------------------------
 
 print('\n', 'Script runtime:', round(((time.time()-start)/60), 2), 'minutes')
 print(' ----------------- END ----------------- \n')
+

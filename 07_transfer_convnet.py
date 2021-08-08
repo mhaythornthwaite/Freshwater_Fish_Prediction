@@ -106,9 +106,63 @@ model.compile(loss='categorical_crossentropy',
 
 clf = model.fit_generator(train_generator,
                           steps_per_epoch=steps_per_train_epoch,
-                          epochs=10,
+                          epochs=100,
                           validation_data=test_generator,
                           validation_steps=steps_per_val_epoch)
+
+
+#------------------------------- MODEL PERFORMANCE ----------------------------
+
+#--------- TRAINING & VALIDATION LOSS ---------
+
+#setting up plottable variables
+history_dict = clf.history
+loss_values = history_dict['loss']
+val_loss = history_dict['val_loss']
+epochs = list(range(1, len(loss_values)+1))
+
+#fig setup including twin axis
+fig, ax = plt.subplots()
+fig.suptitle('Training & Validation Loss VGG16 Transfer Convnet', y=0.95, fontsize=14, fontweight='bold')
+
+#plotting training and validation loss
+ax.plot(epochs, loss_values, 'b', label='Training Loss')
+ax.plot(epochs, val_loss, 'r', label='Validation Loss')
+ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+
+#setting axis limits
+ax.set_ylim([min(loss_values)-0.25, min(loss_values)+1.75])
+
+#plotting legend
+ax.legend()
+
+#plotting axis labels
+ax.set_xlabel('Epochs')
+ax.set_ylabel('Loss')
+
+#--------- TRAINING & VALIDATION ACCURACY ---------
+
+#setting up plottable variables
+accuracy_values = history_dict['accuracy']
+val_accuracy = history_dict['val_accuracy']
+
+#fig setup including twin axis
+fig2, ax = plt.subplots()
+fig2.suptitle('Training & Validation Accuracy VGG16 Transfer Convnet', y=0.95, fontsize=14, fontweight='bold')
+
+#plotting training and validation loss
+ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')
+ax.plot(epochs, val_accuracy, 'r', label='Validation Accuracy')
+ax.axhline(max(val_accuracy), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
+ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
+
+#setting axis limits
+ax.set_ylim([0,max(accuracy_values)+0.1])
+
+#plotting legend
+ax.legend()
+ax.set(xlabel='Epochs',
+       ylabel='Accuracy');
 
 
 # ----------------------------------- END -------------------------------------

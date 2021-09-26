@@ -16,15 +16,80 @@
     </a>
 </p>
 
-<h3> Workplan </h3>
 
-<p>
-	In this project data will be collected from google images. Between 50 - 100 images will initially be collected per class however, more may need to be collected after initial model evaluation. Approximately 10/15 species of fish will be trained to begin with, with more classes added if necessary.
 
-</p>
+## Table of Contents
 
-<h3> Data </h3>
+<!--ts-->
+* [Aims and Objectives](#Aims-and-Objectives)
+* [Dataset](#Dataset)
+* [Data Cleaning and Preparation](#Data-Cleaning-and-Preparation)
+* [Model Building](#Model-Building)
+  - [Basic Multilayer Perceptron](#Basic-Multilayer-Perceptron)
+  - [Basic Convolutional Network](#Basic-Convolutional-Network)
+  - [Complex Convolutional Network](#Deep-Convolutional-Network)
+  - [Transfer VG16 Network](#Transfer-VG16-Network)
+* [Further Work and Improvements](#Further-Work-and-Improvements)
+* [Appendix](#Apendix)
+<!--te-->
 
-<p>
-	Raw data and labels can be downloaded <a href="https://drive.google.com/drive/folders/1Sah-IcSeIR8jjLbR2qDgj3RnovsHxEq3?usp=sharing" target="_blank">here</a>.
-</p>
+
+## Aims and Objectives
+
+The aim of this study was to train a network that could identify species of british freshwater fish on RGB images.
+
+
+## Dataset
+
+In total 14 different species of British freshwater fish were selected, with 100 images for each class collected using the <a href="https://pypi.org/project/google_images_download/" target="_blank"> google_images_download</a> library. A list of the species collected can be found in the [appendix](#Appendix). Manual QC of this dataset was undertaken to remove any anomalous results returned by the library which were not representative of the given class e.g. images containing multiple different species of fish. Raw data and labels can be downloaded <a href="https://drive.google.com/drive/folders/1Sah-IcSeIR8jjLbR2qDgj3RnovsHxEq3?usp=sharing" target="_blank">here</a>.
+
+
+## Data Cleaning and Preparation
+
+
+
+## Model Building
+
+
+### Basic Multilayer Perceptron
+
+### Basic Convolutional Network
+
+### Complex Convolutional Network
+
+### Transfer VG16 Network
+
+
+
+
+
+## Further Work and Improvements
+
+
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details. 
+
+
+
+
+## Appendix
+
+### Fish Secies Collected
+
+- Roach
+- Rudd
+- Common Bream
+- Common Carp
+- Mirror Carp
+- Tench
+- Perch
+- Pike
+- Barbel
+- Chub
+- Gudgeon
+- Rainbow Trout
+- Brown Trout
+- Grayling
+

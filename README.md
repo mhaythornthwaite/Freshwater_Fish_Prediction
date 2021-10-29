@@ -82,6 +82,17 @@ Images were resampled to various sizes for training however, the original 32 * 3
 
 <em>Figure 4. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 20% after ~ 70 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 20 epochs.</em>
 
+<br>
+
+In an attempt to reduce the overfitting in this model, L2 regularisation was added to the loss function. This saw an incrimental increase in the accuracy to ~ 25%. We also see a reduction in overfitting in the later epochs which appear to yield the best accuracies. This can be seen in figure 5.
+
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4b_basic_convnet_l2reg.png" alt="Figure 5">
+
+<em>Figure 4. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 25% after ~ 70 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 15 epochs.</em>
+
+<br>
+
+
 
 
 ### Transfer VG16 Network

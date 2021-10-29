@@ -44,6 +44,14 @@ In total 14 different species of British freshwater fish were selected, with 100
 
 <em>Figure 1. Number of samples per class present in the entire dataset.</em>
 
+<br>
+
+An example of a selection of images in a single batch size of 32 can be seen in figure 2. Here all images have been standardised to a common size of 256 * 256 ready for training.
+
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures/Images_in_a_single_batch_v2.png" alt="Figure 1">
+
+<em>Figure 2. Example of images present in a single batch for training.</em>
+
 
 ## Model Building
 
@@ -54,17 +62,25 @@ In order to achieve the project aims, numerous models of increasing complexity w
 
 To begin with the most basic approach was taken, training a simple multilayer perceptron. Images were resampled to 32 * 32 before being vectorised ready for input into the model. A small image size was chosen in an attempt to reduce the number of trainable parameters. Identifying fish species with the human eye was difficult, but not impossible, in most cases a reasonable guess could be made. 
 
-The final model comprised of three fully connected hidden layers, all with a relu activation function, beginning with 192 neurons, reducing to 96 and 48 neurons in the later layers. A softmax activation was chosen for the output comprising of 14 neurons. Training was completed in batch sizes of 32, using <a href="https://keras.io/api/losses/probabilistic_losses/#categoricalcrossentropy-class" target="_blank"> categorical crossentropy</a> and an <a href="https://keras.io/api/optimizers/adam/" target="_blank"> adam</a> optimiser. 
+The final model comprised of three fully connected hidden layers, all with a relu activation function except the output layer which has a softmax activation. Training was completed in batch sizes of 32, using <a href="https://keras.io/api/losses/probabilistic_losses/#categoricalcrossentropy-class" target="_blank"> categorical crossentropy</a> and an <a href="https://keras.io/api/optimizers/adam/" target="_blank"> adam</a> optimiser. 
 
-The results can be studied in figure 2. Overfitting occurs after around 15 epochs where an inflection can be observed in the loss of the validation set. Despite this we see an increase in accuracy to ~ 10% after 60 epochs. Selection of one of these models may produce a better prediction than a random guess but as expected the result is poor.
+The results can be studied in figure 3. Overfitting occurs after around 15 epochs where an inflection can be observed in the loss of the validation set. Despite this we see an increase in accuracy to ~ 10% after 60 epochs. Selection of one of these models may produce a better prediction than a random guess but as expected the result is poor.
 
-<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/3_basin_nn.png" alt="Figure 2">
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/3_basin_nn.png" alt="Figure 3">
 
 
 
-<em>Figure 2. (a) Training and validation accuracy up to 100 epochs. Validation accuracy only rises above a random guess accuracy after ~ 60 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 15 epochs.</em>
+<em>Figure 3. (a) Training and validation accuracy up to 100 epochs. Validation accuracy only rises above a random guess accuracy after ~ 60 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 15 epochs.</em>
 
 ### Convolutional Network
+
+A simple convnet was tested next. 3 convolutional layers and 2 max pooling layers forms the basis of the convolutional block. This is then connected to a flatten and 2 dense layers for classification.
+
+Images were resampled to various sizes for training however, the original 32 * 32 reduction resulted in highest accuracy and least overfitting. As seen in figure 4, using a convolutional architure results in a doubling of accuracy to ~ 20%. 
+
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4a_basic_convnet.png" alt="Figure 4">
+
+<em>Figure 4. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 20% after ~ 70 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 20 epochs.</em>
 
 
 

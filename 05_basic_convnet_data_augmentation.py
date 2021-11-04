@@ -85,7 +85,7 @@ steps_per_train_epoch = train_generator.__len__()
 steps_per_val_epoch = test_generator.__len__()
 
 
-#---------- DATA AUGMENTATION VISUALISATION ----------
+#----------------------- DATA AUGMENTATION VISUALISATION ----------------------
 
 #plotting data augmentation with high resolution
 im = plt.imread(label_paths[22])

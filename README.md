@@ -74,9 +74,9 @@ The results can be studied in figure 3. Overfitting occurs after around 15 epoch
 
 ### Convolutional Network
 
-A simple convnet was tested next. 3 convolutional layers and 2 max pooling layers forms the basis of the convolutional block. This is then connected to a flatten and 2 dense layers for classification.
+A simple convnet was tested next. 3 convolutional layers and 2 max pooling layers form the basis of the convolutional block. This is then flattened and connected to 2 dense layers for classification.
 
-Images were resampled to various sizes for training however, the original 32 * 32 reduction resulted in highest accuracy and least overfitting. As seen in figure 4, using a convolutional architure results in a doubling of accuracy to ~ 20%. 
+Images were resampled to various sizes for training however, the original 32 * 32 resolution resulted in highest accuracy and least overfitting. As seen in figure 4, using a convolutional architecture results in a doubling of accuracy to ~ 20%. 
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4a_basic_convnet.png" alt="Figure 4">
 
@@ -84,14 +84,27 @@ Images were resampled to various sizes for training however, the original 32 * 3
 
 <br>
 
-In an attempt to reduce the overfitting in this model, L2 regularisation was added to the loss function. This saw an incrimental increase in the accuracy to ~ 25%. We also see a reduction in overfitting in the later epochs which appear to yield the best accuracies. This can be seen in figure 5.
+In an attempt to reduce the overfitting in this model, L2 regularisation was added to the loss function. This saw an incremental increase in the accuracy to ~ 25%. We also see a reduction in overfitting in the later epochs which appear to yield the best accuracies. This can be seen in figure 5.
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4b_basic_convnet_l2reg.png" alt="Figure 5">
 
-<em>Figure 4. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 25% after ~ 70 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 15 epochs.</em>
+<em>Figure 5. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 25% after ~ 70 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 15 epochs.</em>
 
 <br>
 
+The last step to improve this model was through introducing data augmentation to the training dataset. When a batch is being 'assembled' ready for training, each image is allowed to rotate, shift position, zoom, shear and or flip. In each epoch the model is exposed to a different version of every image used in training, helping the model to generalise better and prevent overfitting. As a result, the model will be better equipped to identify fish species irrespective of the relative size or rotation of the target. An example of data augmentation on a single training image can be seen in figure 6. 
+
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//data_aug_combined.png" alt="Figure 6">
+
+<em>Figure 6. (a) Data augmentation on a single high-resolution image (512 * 512) (b) Data augmentation on the same image but with a resolution of 64 * 64 used for training. </em>
+
+<br>
+
+The architecture of the model remains the same as the previous. As before, input image sizes were tested as an important hyperparameter, with 64 * 64 yielding highest accuracies. This is a constant trade-off between retaining as much information stored in the original image whilst keeping the number of trainable parameters in the model to a minimum. This stage resulted in a good increase in accuracy to ~ 35% as shown in figure 7. 
+
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/5_basic_convnet_aug.png" alt="Figure 7">
+
+<em>Figure 7. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 35% after ~ 80 epochs. (b) Training and validation loss up to 100 epochs. Overfitting is significantly reduced in comparison to previous models, with only a minor increase in validation loss after ~ 50 epochs. </em>
 
 
 

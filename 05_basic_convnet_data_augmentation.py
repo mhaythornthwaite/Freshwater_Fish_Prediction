@@ -23,6 +23,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import pandas as pd
 import numpy as np
 import pickle
+import cv2
 import matplotlib.pyplot as plt
 from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_image
 
@@ -30,6 +31,12 @@ plt.close('all')
 
 #note that to allow tensorflow to be compatible with the GPU cudnn==7.6.4 was installed in the environment. 
 print_tf_setup()
+
+
+#--------------------------------- DATA LOADING -------------------------------
+    
+with open('data_labels/label_paths', 'rb') as myFile:
+    label_paths = pickle.load(myFile)
 
 
 #------------------------------- INPUT VARIABLES ------------------------------
@@ -71,12 +78,43 @@ test_generator = train_datagen.flow_from_directory(test_dir,
 for data_batch, labels_batch in train_generator:
     print('data batch shape:', data_batch.shape)
     print('labels batch shape:', labels_batch.shape)
-    t = data_batch
-    t2 = labels_batch
     break
 
+#checking the number of iterations per epoch = number of images / batch size
 steps_per_train_epoch = train_generator.__len__()
 steps_per_val_epoch = test_generator.__len__()
+
+
+#---------- DATA AUGMENTATION VISUALISATION ----------
+
+#plotting data augmentation with high resolution
+im = plt.imread(label_paths[22])
+im = cv2.resize(im, dsize=(512,512), interpolation=cv2.INTER_CUBIC)
+
+fig, ((ax1, ax2),(ax3, ax4)) = plt.subplots(ncols=2,
+                                            nrows=2,
+                                            figsize=(10,12))
+ax1.imshow(train_datagen.random_transform(im))
+ax2.imshow(train_datagen.random_transform(im))
+ax3.imshow(train_datagen.random_transform(im))
+ax4.imshow(train_datagen.random_transform(im))
+
+fig.suptitle('Data Augmentation Example: High Resolution', y=0.95, fontsize=22, fontweight='bold')
+
+
+#plotting data augmentation with low resolution
+im = plt.imread(label_paths[22])
+im = cv2.resize(im, dsize=(64,64), interpolation=cv2.INTER_CUBIC)
+
+fig, ((ax1, ax2),(ax3, ax4)) = plt.subplots(ncols=2,
+                                            nrows=2,
+                                            figsize=(10,12))
+ax1.imshow(train_datagen.random_transform(im))
+ax2.imshow(train_datagen.random_transform(im))
+ax3.imshow(train_datagen.random_transform(im))
+ax4.imshow(train_datagen.random_transform(im))
+
+fig.suptitle('Data Augmentation Example: Low Resolution', y=0.95, fontsize=22, fontweight='bold')
 
 
 #---------------------------------- MODEL BUILD -------------------------------
@@ -100,7 +138,7 @@ model.summary()
 
 clf = model.fit_generator(train_generator,
                           steps_per_epoch=steps_per_train_epoch,
-                          epochs=100,
+                          epochs=1,
                           validation_data=test_generator,
                           validation_steps=steps_per_val_epoch)
 

@@ -48,7 +48,7 @@ In total 14 different species of British freshwater fish were selected, with 100
 
 An example of a selection of images in a single batch size of 32 can be seen in figure 2. Here all images have been standardised to a common size of 256 * 256 ready for training.
 
-<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures/Images_in_a_single_batch_v2.png" alt="Figure 1">
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures/Images_in_a_single_batch_v2.png" alt="Figure 2">
 
 <em>Figure 2. Example of images present in a single batch for training.</em>
 

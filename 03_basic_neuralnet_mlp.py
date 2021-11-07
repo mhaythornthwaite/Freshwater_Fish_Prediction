@@ -16,16 +16,13 @@ start=time.time()
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-import tensorflow as tf
-import tensorflow_hub as hub
 from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.model_selection import train_test_split
-import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_vector
+from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_vector, n_retraining
 
 plt.close('all')
 
@@ -50,6 +47,7 @@ with open('data_labels/label_paths', 'rb') as myFile:
 image_size = (32, 32)
 batch_size = 32
 num_classes = 14
+num_epochs = 100
 
 image_vector_len = image_size[0] * image_size[1]
 num_images = len(labels)
@@ -66,9 +64,6 @@ plt.imshow(im, cmap='gray', vmin=0, vmax=255)
 #loading all our data to a np array, and train test split
 data_array = gen_data_array_vector(label_paths, image_size)
 train_images, test_images, train_labels, test_labels = train_test_split(data_array, one_hot_labels, test_size=0.2)
-
-#train_images = train_images[:100]
-#train_labels = train_labels[:100]
 
 
 #---------------------------------- MODEL BUILD -------------------------------
@@ -93,10 +88,24 @@ simple_model.compile(loss='categorical_crossentropy',
 simple_model.summary()
 
 clf = simple_model.fit(train_images, 
-                           train_labels, 
-                           epochs=100, 
-                           batch_size=batch_size,
-                           validation_data=(test_images, test_labels))
+                       train_labels, 
+                       epochs=num_epochs, 
+                       batch_size=batch_size,
+                       validation_data=(test_images, test_labels))
+
+metrics_dict = n_retraining(model=simple_model, 
+                            n=10, 
+                            train_data=train_images, 
+                            train_labels=train_labels, 
+                            val_data=test_images,
+                            val_labels=test_labels,
+                            epochs=num_epochs,
+                            batch_size=batch_size,
+                            s=3)
+
+#looking at predictions on a collection of test and train images for basic inspection and QC.
+train_predictions = simple_model.predict(train_images[:100])
+val_predictions = simple_model.predict(test_images[:100])
 
 
 #------------------------------- MODEL PERFORMANCE ----------------------------
@@ -114,22 +123,18 @@ fig, ax = plt.subplots()
 fig.suptitle('Training & Validation Loss Basic Dense Network', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
-ax.plot(epochs, loss_values, 'b', label='Training Loss')
-ax.plot(epochs, val_loss, 'r', label='Validation Loss')
-ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+ax.plot(epochs, metrics_dict['train_loss_mean'], 'b', label='Training Loss')
+ax.plot(epochs, metrics_dict['val_loss_mean'], 'r', label='Validation Loss')
+ax.plot(epochs, metrics_dict['val_loss_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict['val_loss_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict['val_loss_std_p'], metrics_dict['val_loss_std_n'], color='grey', alpha=0.15)
+ax.axhline(np.nanmin(metrics_dict['val_loss_mean']), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
-#setting axis limits
-ax.set_ylim([min(loss_values)-0.5, min(loss_values)+3])
-
-#plotting legend
-ax.legend()
-
-#plotting axis labels
+#setting axis limits, labels and legend
+ax.set_ylim([np.nanmin(metrics_dict['train_loss_mean'])-0.5, np.nanmin(metrics_dict['train_loss_mean'])+4])
 ax.set_xlabel('Epochs')
 ax.set_ylabel('Loss')
-
-train_predictions = simple_model.predict(train_images[:100])
-val_predictions = simple_model.predict(test_images[:100])
+ax.legend()
 
 #--------- TRAINING & VALIDATION ACCURACY ---------
 
@@ -137,26 +142,27 @@ val_predictions = simple_model.predict(test_images[:100])
 accuracy_values = history_dict['accuracy']
 val_accuracy = history_dict['val_accuracy']
 
-#fig setup including twin axis
+#fig setup
 fig2, ax = plt.subplots()
 fig2.suptitle('Training & Validation Accuracy Basic Dense Network', y=0.95, fontsize=14, fontweight='bold')
 
-#plotting training and validation loss
-ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')
-ax.plot(epochs, val_accuracy, 'r', label='Validation Accuracy')
-ax.axhline(max(val_accuracy), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
+#plotting training and validation accuracy
+ax.plot(epochs, metrics_dict['train_acc_mean'], 'b', label='Training Accuracy')
+ax.plot(epochs, metrics_dict['val_acc_mean'], 'r', label='Validation Accuracy')
+ax.plot(epochs, metrics_dict['val_acc_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict['val_acc_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict['val_acc_std_p'], metrics_dict['val_acc_std_n'], color='grey', alpha=0.15)
+
+#plotting accuracy lines
+ax.axhline(np.nanmax(metrics_dict['val_acc_mean']), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
 ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
 
-#setting axis limits
-ax.set_ylim([0,max(accuracy_values)+0.1])
-
-#plotting legend
+#plotting legend and setting limits
 ax.legend()
 ax.set(xlabel='Epochs',
        ylabel='Accuracy');
+ax.set_ylim([0,np.nanmax(metrics_dict['train_acc_mean'])+0.1])
 
-
-#https://www.youtube.com/watch?v=J6Ok8p463C4
 
 # ----------------------------------- END -------------------------------------
 

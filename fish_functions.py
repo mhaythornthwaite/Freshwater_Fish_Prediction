@@ -44,8 +44,8 @@ def smooth_filter(y, box_pts, set_nan=True):
     edge = int((box_pts - 1) / 2)
     
     if set_nan:
-        y_smooth[:edge] = ['NaN', 'NaN']
-        y_smooth[-edge:] = ['NaN', 'NaN']
+        y_smooth[:edge] = ['NaN'] * edge
+        y_smooth[-edge:] = ['NaN'] * edge
     else:
         y_smooth[:edge] = y[:edge]
         y_smooth[-edge:] = y[-edge:]        

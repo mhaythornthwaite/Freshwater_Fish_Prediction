@@ -16,6 +16,44 @@ import numpy as np
 from tensorflow import keras
 
 
+def smooth_filter(y, box_pts, set_nan=True):
+    '''
+    smooths a 1d array with a convultional filter
+
+    Parameters
+    ----------
+    y : numpy array 
+        1d array of float or integers to be smoothed.
+    box_pts : int
+        size of convultional filter.
+    set_nan : bool, optional
+        removes edge effects by replacing values with NaN. The default is True.
+
+    Returns
+    -------
+    y_smooth : numpy array
+        1d smoothed array.
+
+    '''
+    
+    if box_pts % 2 == 0:
+        box_pts = box_pts + 1
+        
+    box = np.ones(box_pts)/box_pts
+    y_smooth = np.convolve(y, box, mode='same')
+    edge = int((box_pts - 1) / 2)
+    
+    if set_nan:
+        y_smooth[:edge] = ['NaN', 'NaN']
+        y_smooth[-edge:] = ['NaN', 'NaN']
+    else:
+        y_smooth[:edge] = y[:edge]
+        y_smooth[-edge:] = y[-edge:]        
+    
+    return y_smooth
+
+
+
 def reset_weights(model):
     '''
     Re-intantiates a keras model with random weights
@@ -334,3 +372,89 @@ def print_tf_setup():
     print(' ---------------------------------------\n')
     
     return None
+
+
+def n_retraining(model, n, train_data, train_labels, val_data, val_labels, smooth=True, s=5, epochs=100, batch_size=32): 
+    '''
+    Retrains a model n times, randomly instantiating the model with weights on each iteration to attain more robust model performance metrics
+
+    Parameters
+    ----------
+    model : tf.keras.model
+        Keras model of dense or convolutional layers. Not tested on other layer types
+    n : int
+        number of iterations to retrain the model. More iterations will attain a more stable result but will be more compuatationally expensive.
+    train_data : numpy array
+        array of training data.
+    train_labels : numpy array
+        array of training data labels.
+    val_data : numpy array
+        array of validation data.
+    val_labels : numpy array
+        array of validation data labels.
+    smooth : bool optional
+        Smooth the metrics. The default is True.
+    s : int, optional
+        filter length of smoothing operator. The default is 5.
+    epochs : int, optional
+        number of epochs for model training. The default is 100.
+    batch_size : int, optional
+        batch size per iteration. The default is 32.
+
+    Returns
+    -------
+    metrics_dict : dictionary 
+        training and validation loss and accuracy metrics (mean and standard deviation).
+
+    '''
+    
+    train_loss_array = np.empty((0,epochs), float)
+    val_loss_array = np.empty((0,epochs), float)
+
+    train_accuracy_array = np.empty((0,epochs), float)
+    val_accuracy_array = np.empty((0,epochs), float)
+
+    for _ in range(n):
+        
+        reset_weights(model)
+
+        clf = model.fit(train_data, 
+                               train_labels, 
+                               epochs=epochs, 
+                               batch_size=batch_size,
+                               validation_data=(val_data, val_labels))
+    
+        history_dict = clf.history
+
+        train_loss_list = history_dict['loss']
+        val_loss_list = history_dict['val_loss']
+        train_accuracy_list = history_dict['accuracy']
+        val_accuracy_list = history_dict['val_accuracy']
+        
+        if smooth:
+            train_loss_list = smooth_filter(train_loss_list, s)
+            val_loss_list = smooth_filter(val_loss_list, s)
+            train_accuracy_list = smooth_filter(train_accuracy_list, s)
+            val_accuracy_list = smooth_filter(val_accuracy_list, s)
+
+        train_loss_array = np.append(train_loss_array, np.array([train_loss_list]), axis=0)
+        val_loss_array = np.append(val_loss_array, np.array([val_loss_list]), axis=0)
+        train_accuracy_array = np.append(train_accuracy_array, np.array([train_accuracy_list]), axis=0)
+        val_accuracy_array = np.append(val_accuracy_array, np.array([val_accuracy_list]), axis=0)
+
+    metrics_dict = {
+        'train_loss_mean': np.mean(train_loss_array, 0),
+        'train_loss_std_p': np.mean(train_loss_array, 0) + np.std(train_loss_array, 0),
+        'train_loss_std_n': np.mean(train_loss_array, 0) - np.std(train_loss_array, 0),
+        'val_loss_mean': np.mean(val_loss_array, 0),
+        'val_loss_std_p': np.mean(val_loss_array, 0) + np.std(val_loss_array, 0),
+        'val_loss_std_n': np.mean(val_loss_array, 0) - np.std(val_loss_array, 0),
+        'train_acc_mean': np.mean(train_accuracy_array, 0),
+        'train_acc_std_p': np.mean(train_accuracy_array, 0) + np.std(train_accuracy_array, 0),
+        'train_acc_std_n': np.mean(train_accuracy_array, 0) - np.std(train_accuracy_array, 0),
+        'val_acc_mean': np.mean(val_accuracy_array, 0),
+        'val_acc_std_p': np.mean(val_accuracy_array, 0) + np.std(val_accuracy_array, 0),
+        'val_acc_std_n': np.mean(val_accuracy_array, 0) - np.std(val_accuracy_array, 0)
+        }    
+        
+    return metrics_dict

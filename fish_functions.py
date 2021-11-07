@@ -13,6 +13,30 @@ import string
 import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
+from tensorflow import keras
+
+
+def reset_weights(model):
+    '''
+    Re-intantiates a keras model with random weights
+
+    Parameters
+    ----------
+    model : tf.keras.model
+        Keras model of dense or convolutional layers. Not tested on other layer types
+
+    '''
+    
+    for layer in model.layers: 
+        if isinstance(layer, tf.keras.Model):
+            reset_weights(layer)
+            continue
+        for k, initializer in layer.__dict__.items():
+            if "initializer" not in k:
+                continue
+            #find the corresponding variable
+            var = getattr(layer, k.replace("_initializer", ""))
+            var.assign(initializer(var.shape, var.dtype))
 
 
 def get_random_string(length):

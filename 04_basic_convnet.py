@@ -123,7 +123,7 @@ epochs = list(range(1, len(loss_values)+1))
 
 #fig setup including twin axis
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss Basic Dense Network', y=0.95, fontsize=14, fontweight='bold')
+fig.suptitle('Training & Validation Loss Basic CNN + L2reg', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
 ax.plot(epochs, metrics_dict['train_loss_mean'], 'b', label='Training Loss')
@@ -147,7 +147,7 @@ val_accuracy = history_dict['val_accuracy']
 
 #fig setup
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy Basic Dense Network', y=0.95, fontsize=14, fontweight='bold')
+fig2.suptitle('Training & Validation Accuracy Basic CNN + L2reg', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation accuracy
 ax.plot(epochs, metrics_dict['train_acc_mean'], 'b', label='Training Accuracy')

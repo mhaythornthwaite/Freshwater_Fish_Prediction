@@ -46,7 +46,7 @@ In total 14 different species of British freshwater fish were selected, with 100
 
 <br>
 
-An example of a selection of images in a single batch size of 32 can be seen in figure 2. Here all images have been standardised to a common size of 256 * 256 ready for training.
+An example of a selection of images in a single batch can be seen in figure 2, standardised with a common resolution of 256 * 256 pixels. Depending on model architecture, in some cases it was necessary to further reduce the resolution of the images in a bid to reduce model complexity and number of trainable parameters.   
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures/Images_in_a_single_batch_v2.png" alt="Figure 2">
 
@@ -60,35 +60,34 @@ In order to achieve the project aims, numerous models of increasing complexity w
 
 ### Multilayer Perceptron
 
-To begin with the most basic approach was taken, training a simple multilayer perceptron. Images were resampled to 32 * 32 before being vectorised ready for input into the model. A small image size was chosen in an attempt to reduce the number of trainable parameters. Identifying fish species with the human eye was difficult, but not impossible, in most cases a reasonable guess could be made. 
+To begin with the most basic approach was taken, training a simple multilayer perceptron. Images were resampled to 32 * 32 with a single black-white channel, before being vectorised ready for input into the model. A small image size was chosen in an attempt to reduce the number of trainable parameters. Identifying fish species with the human eye was difficult, but not impossible, in most cases a reasonable guess could be made. 
 
 The final model comprised of three fully connected hidden layers, all with a relu activation function except the output layer which has a softmax activation. Training was completed in batch sizes of 32, using <a href="https://keras.io/api/losses/probabilistic_losses/#categoricalcrossentropy-class" target="_blank"> categorical crossentropy</a> and an <a href="https://keras.io/api/optimizers/adam/" target="_blank"> adam</a> optimiser. 
 
-The results can be studied in figure 3. Overfitting occurs after around 15 epochs where an inflection can be observed in the loss of the validation set. Despite this we see an increase in accuracy to ~ 10% after 60 epochs. Selection of one of these models may produce a better prediction than a random guess but as expected the result is poor.
+The results can be studied in figure 3. Overfitting occurs after around 40 epochs where an inflection can be observed in the loss of the validation set. Despite this we see the largest accuracy of 8% after 80 epochs. Selecting a model after 80 epochs may produce the best absolute prediction, but due to overfitting seen in the loss function, will likely overestimate the probability of the prediction. Depending on the use of the model, this may or may not pose an issue. As expected however, model performance is very poor, only narrowly beating a random guess.
 
-<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/3_basin_nn.png" alt="Figure 3">
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/3_basin_nn_v2.png" alt="Figure 3">
 
+<em>Figure 3. (a) Results averaged from 10 models trained with random weights initialisation. Grey shade shows one standard deviation around the validation accuracy. Accuracy suggests the model performs only marginally better than a random guess. (b) Grey shade shows one standard deviation around the validation loss. Overfitting of the loss function on the validation data appears after 40 epochs. </em>
 
-
-<em>Figure 3. (a) Training and validation accuracy up to 100 epochs. Validation accuracy only rises above a random guess accuracy after ~ 60 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 15 epochs.</em>
 
 ### Convolutional Network
 
 A simple convnet was tested next. 3 convolutional layers and 2 max pooling layers form the basis of the convolutional block. This is then flattened and connected to 2 dense layers for classification.
 
-Images were resampled to various sizes for training however, the original 32 * 32 resolution resulted in highest accuracy and least overfitting. As seen in figure 4, using a convolutional architecture results in a doubling of accuracy to ~ 20%. 
+Images were resampled to various sizes for training however, the original 32 * 32 resolution resulted in highest accuracy and least overfitting. As seen in figure 4, using a convolutional architecture results in a doubling of accuracy to 19%. 
 
-<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4a_basic_convnet.png" alt="Figure 4">
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4a_basic_convnet_v2.png" alt="Figure 4">
 
-<em>Figure 4. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 20% after ~ 70 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 20 epochs.</em>
+<em>Figure 4. (a) Results averaged from 10 models trained with random weights initialisation. Grey shade shows one standard deviation around the validation accuracy. Validation accuracy rises to 19% after 90 epochs. (b) Grey shade shows one standard deviation around the validation loss. Overfitting of the loss function on the validation data appears after around 20 epochs. Note that the validation loss for the first epoch is lower than the training loss. This is because training loss is measured during each epoch whereas validation loss is measured after. </em>
 
 <br>
 
-In an attempt to reduce the overfitting in this model, L2 regularisation was added to the loss function. This saw an incremental increase in the accuracy to ~ 25%. We also see a reduction in overfitting in the later epochs which appear to yield the best accuracies. This can be seen in figure 5.
+In an attempt to reduce the overfitting in this model, L2 regularisation was added to the loss function, and a modest dropout layer (rate = 0.2) added to the model after flattening. Accuracy remains roughly the same, increasing slightly to 20%. We do however, see a decrease in overfitting apparent in the validation loss, seen in figure 5.
 
-<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4b_basic_convnet_l2reg.png" alt="Figure 5">
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4b_basic_convnet_reg_v2.png" alt="Figure 5">
 
-<em>Figure 5. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 25% after ~ 70 epochs. (b) Training and validation loss up to 100 epochs. Overfitting of the loss function on the validation data appears after ~ 15 epochs.</em>
+<em>Figure 5. (a) Results averaged from 10 models trained with random weights initialisation. Grey shade shows one standard deviation around the validation accuracy. Validation accuracy rises to 20% after 90 epochs. (b) Grey shade shows one standard deviation around the validation loss. Overfitting of the loss function on the validation data appears after around 30 epochs and increases to a lower value. As with the previous model the validation loss for the first epoch is lower than the training loss. The addition of dropout could also be contributing to this effect, as this layer is only active during the training phase. </em>
 
 <br>
 
@@ -105,7 +104,6 @@ The architecture of the model remains the same as the previous. As before, input
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/5_basic_convnet_aug.png" alt="Figure 7">
 
 <em>Figure 7. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 35% after ~ 80 epochs. (b) Training and validation loss up to 100 epochs. Overfitting is significantly reduced in comparison to previous models, with only a minor increase in validation loss after ~ 50 epochs. </em>
-
 
 
 ### Transfer VG16 Network

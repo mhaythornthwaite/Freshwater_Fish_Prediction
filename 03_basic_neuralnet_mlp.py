@@ -107,6 +107,12 @@ metrics_dict = n_retraining(model=simple_model,
 train_predictions = simple_model.predict(train_images[:100])
 val_predictions = simple_model.predict(test_images[:100])
 
+#printing validation accuracy information to the console
+max_accuracy = np.nanmax(metrics_dict['val_acc_mean'])
+max_accuracy_epoch = list(metrics_dict['val_acc_mean']).index(max_accuracy)
+max_accuracy = round((np.nanmax(metrics_dict['val_acc_mean'])), 3) * 100
+print(f'\nMax accuracy of {max_accuracy}% achieved after {max_accuracy_epoch} epochs\n')
+
 
 #------------------------------- MODEL PERFORMANCE ----------------------------
 

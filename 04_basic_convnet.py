@@ -78,6 +78,7 @@ model = keras.Sequential([
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(64, (3,3), activation='relu'),
     layers.Flatten(),
+    layers.Dropout(0.2),
     layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
     layers.Dense(14, activation='softmax')
     ])
@@ -110,6 +111,12 @@ metrics_dict = n_retraining(model=model,
 train_predictions = model.predict(train_images[:100])
 val_predictions = model.predict(test_images[:100])
 
+#printing validation accuracy information to the console
+max_accuracy = np.nanmax(metrics_dict['val_acc_mean'])
+max_accuracy_epoch = list(metrics_dict['val_acc_mean']).index(max_accuracy)
+max_accuracy = round((np.nanmax(metrics_dict['val_acc_mean'])), 3) * 100
+print(f'\nMax accuracy of {max_accuracy}% achieved after {max_accuracy_epoch} epochs\n')
+
 
 #------------------------------- MODEL PERFORMANCE ----------------------------
 
@@ -123,7 +130,7 @@ epochs = list(range(1, len(loss_values)+1))
 
 #fig setup including twin axis
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss Basic CNN + L2reg', y=0.95, fontsize=14, fontweight='bold')
+fig.suptitle('Training & Validation Loss Basic CNN + Regularization', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
 ax.plot(epochs, metrics_dict['train_loss_mean'], 'b', label='Training Loss')
@@ -147,7 +154,7 @@ val_accuracy = history_dict['val_accuracy']
 
 #fig setup
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy Basic CNN + L2reg', y=0.95, fontsize=14, fontweight='bold')
+fig2.suptitle('Training & Validation Accuracy Basic CNN + Regularization', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation accuracy
 ax.plot(epochs, metrics_dict['train_acc_mean'], 'b', label='Training Accuracy')

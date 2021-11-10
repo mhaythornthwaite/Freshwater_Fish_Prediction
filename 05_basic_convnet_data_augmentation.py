@@ -25,7 +25,7 @@ import numpy as np
 import pickle
 import cv2
 import matplotlib.pyplot as plt
-from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_image
+from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_image, n_retraining_datagen
 
 plt.close('all')
 
@@ -45,6 +45,7 @@ image_size = (64, 64)
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
+num_epochs = 100
 
 train_dir = 'data_for_generator/train_data'
 test_dir = 'data_for_generator/test_data'
@@ -136,11 +137,20 @@ model.compile(loss='categorical_crossentropy',
 
 model.summary()
 
-clf = model.fit_generator(train_generator,
+clf = model.fit(train_generator,
                           steps_per_epoch=steps_per_train_epoch,
                           epochs=1,
                           validation_data=test_generator,
                           validation_steps=steps_per_val_epoch)
+
+
+metrics_dict = n_retraining_datagen(model=model, 
+                                    n=10, 
+                                    train_generator=train_generator,
+                                    val_generator=test_generator,
+                                    epochs=num_epochs,
+                                    batch_size=batch_size,
+                                    s=3)
 
 
 #------------------------------- MODEL PERFORMANCE ----------------------------

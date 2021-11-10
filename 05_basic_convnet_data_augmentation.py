@@ -45,7 +45,7 @@ image_size = (64, 64)
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
-num_epochs = 100
+num_epochs = 10
 
 train_dir = 'data_for_generator/train_data'
 test_dir = 'data_for_generator/test_data'
@@ -152,59 +152,59 @@ metrics_dict = n_retraining_datagen(model=model,
                                     batch_size=batch_size,
                                     s=3)
 
+#printing validation accuracy information to the console
+max_accuracy = np.nanmax(metrics_dict['val_acc_mean'])
+max_accuracy_epoch = list(metrics_dict['val_acc_mean']).index(max_accuracy)
+max_accuracy = round((np.nanmax(metrics_dict['val_acc_mean'])), 3) * 100
+print(f'\nMax accuracy of {max_accuracy}% achieved after {max_accuracy_epoch} epochs\n')
+
 
 #------------------------------- MODEL PERFORMANCE ----------------------------
 
 #--------- TRAINING & VALIDATION LOSS ---------
 
-#setting up plottable variables
-history_dict = clf.history
-loss_values = history_dict['loss']
-val_loss = history_dict['val_loss']
-epochs = list(range(1, len(loss_values)+1))
+epochs = list(range(1, num_epochs+1))
 
 #fig setup including twin axis
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss Data Aug Convnet', y=0.95, fontsize=14, fontweight='bold')
+fig.suptitle('Training & Validation Loss Basic CNN + Augmentation', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
-ax.plot(epochs, loss_values, 'b', label='Training Loss')
-ax.plot(epochs, val_loss, 'r', label='Validation Loss')
-ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+ax.plot(epochs, metrics_dict['train_loss_mean'], 'b', label='Training Loss')
+ax.plot(epochs, metrics_dict['val_loss_mean'], 'r', label='Validation Loss')
+ax.plot(epochs, metrics_dict['val_loss_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict['val_loss_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict['val_loss_std_p'], metrics_dict['val_loss_std_n'], color='grey', alpha=0.15)
+ax.axhline(np.nanmin(metrics_dict['val_loss_mean']), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
-#setting axis limits
-ax.set_ylim([min(loss_values)-0.25, min(loss_values)+1.55])
-
-#plotting legend
-ax.legend()
-
-#plotting axis labels
+#setting axis limits, labels and legend
+ax.set_ylim([np.nanmin(metrics_dict['train_loss_mean'])-0.25, np.nanmin(metrics_dict['train_loss_mean'])+0.5])
 ax.set_xlabel('Epochs')
 ax.set_ylabel('Loss')
+ax.legend()
 
 #--------- TRAINING & VALIDATION ACCURACY ---------
 
-#setting up plottable variables
-accuracy_values = history_dict['accuracy']
-val_accuracy = history_dict['val_accuracy']
-
-#fig setup including twin axis
+#fig setup
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy Data Aug Convnet', y=0.95, fontsize=14, fontweight='bold')
+fig2.suptitle('Training & Validation Accuracy Basic CNN + Augmentation', y=0.95, fontsize=14, fontweight='bold')
 
-#plotting training and validation loss
-ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')
-ax.plot(epochs, val_accuracy, 'r', label='Validation Accuracy')
-ax.axhline(max(val_accuracy), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
+#plotting training and validation accuracy
+ax.plot(epochs, metrics_dict['train_acc_mean'], 'b', label='Training Accuracy')
+ax.plot(epochs, metrics_dict['val_acc_mean'], 'r', label='Validation Accuracy')
+ax.plot(epochs, metrics_dict['val_acc_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict['val_acc_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict['val_acc_std_p'], metrics_dict['val_acc_std_n'], color='grey', alpha=0.15)
+
+#plotting accuracy lines
+ax.axhline(np.nanmax(metrics_dict['val_acc_mean']), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
 ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
 
-#setting axis limits
-ax.set_ylim([0,max(accuracy_values)+0.1])
-
-#plotting legend
+#plotting legend and setting limits
 ax.legend()
 ax.set(xlabel='Epochs',
        ylabel='Accuracy');
+ax.set_ylim([0,np.nanmax(metrics_dict['train_acc_mean'])+0.1])
 
 
 # ----------------------------------- END -------------------------------------

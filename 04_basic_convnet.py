@@ -122,15 +122,10 @@ print(f'\nMax accuracy of {max_accuracy}% achieved after {max_accuracy_epoch} ep
 
 #--------- TRAINING & VALIDATION LOSS ---------
 
-#setting up plottable variables
-history_dict = clf.history
-loss_values = history_dict['loss']
-val_loss = history_dict['val_loss']
-epochs = list(range(1, len(loss_values)+1))
-
-#fig setup including twin axis
+#fig setup
 fig, ax = plt.subplots()
 fig.suptitle('Training & Validation Loss Basic CNN + Regularization', y=0.95, fontsize=14, fontweight='bold')
+epochs = list(range(1, num_epochs+1))
 
 #plotting training and validation loss
 ax.plot(epochs, metrics_dict['train_loss_mean'], 'b', label='Training Loss')
@@ -147,10 +142,6 @@ ax.set_ylabel('Loss')
 ax.legend()
 
 #--------- TRAINING & VALIDATION ACCURACY ---------
-
-#setting up plottable variables
-accuracy_values = history_dict['accuracy']
-val_accuracy = history_dict['val_accuracy']
 
 #fig setup
 fig2, ax = plt.subplots()

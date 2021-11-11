@@ -99,11 +99,11 @@ The last step to improve this model was through introducing data augmentation to
 
 <br>
 
-The architecture of the model remains the same as the previous. As before, input image sizes were tested as an important hyperparameter, with 64 * 64 yielding highest accuracies. This is a constant trade-off between retaining as much information stored in the original image whilst keeping the number of trainable parameters in the model to a minimum. This stage resulted in a good increase in accuracy to ~ 35% as shown in figure 7. 
+The architecture of the model remains the same as the previous. As before, input image sizes were tested as an important hyperparameter, with 64 * 64 yielding highest accuracy. This is a trade-off between retaining as much information stored in the original image whilst keeping the number of trainable parameters in the model to a minimum. This stage resulted in a good increase in accuracy to 42% as shown in figure 7. 
 
-<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/5_basic_convnet_aug.png" alt="Figure 7">
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/5_basic_convnet_aug_v2.png" alt="Figure 7">
 
-<em>Figure 7. (a) Training and validation accuracy up to 100 epochs. Validation accuracy rises to around 35% after ~ 80 epochs. (b) Training and validation loss up to 100 epochs. Overfitting is significantly reduced in comparison to previous models, with only a minor increase in validation loss after ~ 50 epochs. </em>
+<em>Figure 7. (a) Results averaged from 10 models trained with random weights initialisation. Grey shade shows one standard deviation around the validation accuracy. Validation accuracy rises to 42% after 250 epochs. (b) Grey shade shows one standard deviation around the validation loss. Overfitting of the loss function on the validation data appears after around 75 epochs. </em>
 
 
 ### Transfer VG16 Network

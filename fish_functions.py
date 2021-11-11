@@ -374,7 +374,7 @@ def print_tf_setup():
     return None
 
 
-def n_retraining(model, n, train_data, train_labels, val_data, val_labels, smooth=True, s=5, epochs=100, batch_size=32): 
+def n_retraining(model, n, train_data, train_labels, val_data, val_labels, smooth=False, s=3, epochs=100, batch_size=32): 
     '''
     Retrains a model n times, randomly instantiating the model with weights on each iteration to attain more robust model performance metrics
 
@@ -393,9 +393,9 @@ def n_retraining(model, n, train_data, train_labels, val_data, val_labels, smoot
     val_labels : numpy array
         array of validation data labels.
     smooth : bool optional
-        Smooth the metrics. The default is True.
+        Smooth the metrics. The default is False.
     s : int, optional
-        filter length of smoothing operator. The default is 5.
+        filter length of smoothing operator. The default is 3.
     epochs : int, optional
         number of epochs for model training. The default is 100.
     batch_size : int, optional
@@ -460,7 +460,7 @@ def n_retraining(model, n, train_data, train_labels, val_data, val_labels, smoot
     return metrics_dict
 
 
-def n_retraining_datagen(model, n, train_generator, val_generator, smooth=True, s=5, epochs=100, batch_size=32): 
+def n_retraining_datagen(model, n, train_generator, val_generator, smooth=False, s=3, epochs=100, batch_size=32): 
     '''
     Retrains a model n times, randomly instantiating the model with weights on each iteration to attain more robust model performance metrics
 
@@ -475,9 +475,9 @@ def n_retraining_datagen(model, n, train_generator, val_generator, smooth=True, 
     val_generator : keras.preprocessing.image.DirectoryIterator
         validation data generator.
     smooth : bool optional
-        Smooth the metrics. The default is True.
+        Smooth the metrics. The default is False.
     s : int, optional
-        filter length of smoothing operator. The default is 5.
+        filter length of smoothing operator. The default is 3.
     epochs : int, optional
         number of epochs for model training. The default is 100.
     batch_size : int, optional

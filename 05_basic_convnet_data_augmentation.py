@@ -25,7 +25,8 @@ import numpy as np
 import pickle
 import cv2
 import matplotlib.pyplot as plt
-from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_image, n_retraining_datagen
+from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_image, n_retraining_datagen, smooth_filter
+import copy
 
 plt.close('all')
 
@@ -52,6 +53,9 @@ test_dir = 'data_for_generator/test_data'
 
 
 #-------------------------------- DATA GENERATOR ------------------------------
+
+#note that using keras image data generators is slow. Right now this is not a major problem with this project, but going forward it may be worth considering building a proper data pipeline using tf.data
+#https://www.tensorflow.org/guide/data
 
 #augmentation to the training data
 train_datagen = ImageDataGenerator(rescale=1./255,
@@ -127,10 +131,11 @@ model.add(layers.Conv2D(64, (3,3), activation='relu'))
 model.add(layers.MaxPooling2D((2, 2)))
 model.add(layers.Conv2D(64, (3,3), activation='relu'))
 model.add(layers.Flatten())
+model.add(layers.Dropout(0.2))
 model.add(layers.Dense(64, activation='relu'))
 model.add(layers.Dense(14, activation='softmax'))
 
-optimiser = keras.optimizers.Adam(learning_rate=0.0005)
+optimiser = keras.optimizers.Adam(learning_rate=0.001)
 model.compile(loss='categorical_crossentropy',
               optimizer=optimiser,
               metrics=["accuracy"])
@@ -138,24 +143,28 @@ model.compile(loss='categorical_crossentropy',
 model.summary()
 
 clf = model.fit(train_generator,
-                          steps_per_epoch=steps_per_train_epoch,
-                          epochs=1,
-                          validation_data=test_generator,
-                          validation_steps=steps_per_val_epoch)
+                steps_per_epoch=steps_per_train_epoch,
+                epochs=2,
+                validation_data=test_generator,
+                validation_steps=steps_per_val_epoch)
 
 
 metrics_dict = n_retraining_datagen(model=model, 
-                                    n=10, 
+                                    n=2, 
                                     train_generator=train_generator,
                                     val_generator=test_generator,
                                     epochs=num_epochs,
-                                    batch_size=batch_size,
-                                    s=3)
+                                    batch_size=batch_size)
+
+#smoothing the output of the metrics dictionary ready for analysis and plotting
+metrics_dict_smooth = copy.deepcopy(metrics_dict)
+for key in metrics_dict_smooth:
+    metrics_dict_smooth[key] = smooth_filter(metrics_dict_smooth[key], 3)
 
 #printing validation accuracy information to the console
-max_accuracy = np.nanmax(metrics_dict['val_acc_mean'])
-max_accuracy_epoch = list(metrics_dict['val_acc_mean']).index(max_accuracy)
-max_accuracy = round((np.nanmax(metrics_dict['val_acc_mean'])), 3) * 100
+max_accuracy = np.nanmax(metrics_dict_smooth['val_acc_mean'])
+max_accuracy_epoch = list(metrics_dict_smooth['val_acc_mean']).index(max_accuracy)
+max_accuracy = round((np.nanmax(metrics_dict_smooth['val_acc_mean'])), 3) * 100
 print(f'\nMax accuracy of {max_accuracy}% achieved after {max_accuracy_epoch} epochs\n')
 
 
@@ -170,15 +179,15 @@ fig, ax = plt.subplots()
 fig.suptitle('Training & Validation Loss Basic CNN + Augmentation', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
-ax.plot(epochs, metrics_dict['train_loss_mean'], 'b', label='Training Loss')
-ax.plot(epochs, metrics_dict['val_loss_mean'], 'r', label='Validation Loss')
-ax.plot(epochs, metrics_dict['val_loss_std_p'], label='_nolegend_', alpha=0)
-ax.plot(epochs, metrics_dict['val_loss_std_n'], label='_nolegend_', alpha=0)
-ax.fill_between(epochs, metrics_dict['val_loss_std_p'], metrics_dict['val_loss_std_n'], color='grey', alpha=0.15)
-ax.axhline(np.nanmin(metrics_dict['val_loss_mean']), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+ax.plot(epochs, metrics_dict_smooth['train_loss_mean'], 'b', label='Training Loss')
+ax.plot(epochs, metrics_dict_smooth['val_loss_mean'], 'r', label='Validation Loss')
+ax.plot(epochs, metrics_dict_smooth['val_loss_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict_smooth['val_loss_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict_smooth['val_loss_std_p'], metrics_dict_smooth['val_loss_std_n'], color='grey', alpha=0.15)
+ax.axhline(np.nanmin(metrics_dict_smooth['val_loss_mean']), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
 #setting axis limits, labels and legend
-ax.set_ylim([np.nanmin(metrics_dict['train_loss_mean'])-0.25, np.nanmin(metrics_dict['train_loss_mean'])+0.5])
+ax.set_ylim([np.nanmin(metrics_dict_smooth['train_loss_mean'])-0.25, np.nanmax(metrics_dict_smooth['val_loss_mean'])+0.55])
 ax.set_xlabel('Epochs')
 ax.set_ylabel('Loss')
 ax.legend()
@@ -190,21 +199,21 @@ fig2, ax = plt.subplots()
 fig2.suptitle('Training & Validation Accuracy Basic CNN + Augmentation', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation accuracy
-ax.plot(epochs, metrics_dict['train_acc_mean'], 'b', label='Training Accuracy')
-ax.plot(epochs, metrics_dict['val_acc_mean'], 'r', label='Validation Accuracy')
-ax.plot(epochs, metrics_dict['val_acc_std_p'], label='_nolegend_', alpha=0)
-ax.plot(epochs, metrics_dict['val_acc_std_n'], label='_nolegend_', alpha=0)
-ax.fill_between(epochs, metrics_dict['val_acc_std_p'], metrics_dict['val_acc_std_n'], color='grey', alpha=0.15)
+ax.plot(epochs, metrics_dict_smooth['train_acc_mean'], 'b', label='Training Accuracy')
+ax.plot(epochs, metrics_dict_smooth['val_acc_mean'], 'r', label='Validation Accuracy')
+ax.plot(epochs, metrics_dict_smooth['val_acc_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict_smooth['val_acc_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict_smooth['val_acc_std_p'], metrics_dict_smooth['val_acc_std_n'], color='grey', alpha=0.15)
 
 #plotting accuracy lines
-ax.axhline(np.nanmax(metrics_dict['val_acc_mean']), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
+ax.axhline(np.nanmax(metrics_dict_smooth['val_acc_mean']), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
 ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
 
 #plotting legend and setting limits
 ax.legend()
 ax.set(xlabel='Epochs',
        ylabel='Accuracy');
-ax.set_ylim([0,np.nanmax(metrics_dict['train_acc_mean'])+0.1])
+ax.set_ylim([0,np.nanmax(metrics_dict_smooth['train_acc_mean'])+0.1])
 
 
 # ----------------------------------- END -------------------------------------

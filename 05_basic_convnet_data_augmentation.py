@@ -46,7 +46,7 @@ image_size = (64, 64)
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
-num_epochs = 10
+num_epochs = 250
 
 train_dir = 'data_for_generator/train_data'
 test_dir = 'data_for_generator/test_data'
@@ -150,7 +150,7 @@ clf = model.fit(train_generator,
 
 
 metrics_dict = n_retraining_datagen(model=model, 
-                                    n=2, 
+                                    n=10, 
                                     train_generator=train_generator,
                                     val_generator=test_generator,
                                     epochs=num_epochs,

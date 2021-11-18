@@ -20,12 +20,13 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, regularizers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications import VGG16
+from tensorflow.keras.applications import VGG16, Xception
 import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_image
+from fish_functions import print_tf_setup, open_jpeg_as_np, gen_data_array_image, n_retraining_datagen, smooth_filter
+import copy
 
 plt.close('all')
 
@@ -35,10 +36,12 @@ print_tf_setup()
 
 #------------------------------- INPUT VARIABLES ------------------------------
 
-image_size = (64, 64)
+image_size = (299, 299)
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
+num_epochs = 5
+transfer_model = Xception #select from here: https://keras.io/api/applications/
 
 train_dir = 'data_for_generator/train_data'
 test_dir = 'data_for_generator/test_data'
@@ -84,85 +87,99 @@ steps_per_val_epoch = test_generator.__len__()
 
 #here we have two different options, we can run the convolutional base over the training images and use hese as direct inputs to a dense classification network. This may be reffered to as fast feature extraction and is computationally cheap. Or we can set the conv base as non-trainable adding a dense classifier on top, simply called feature extraction. This technique allows for data augmentation in the training stage but we have to run the entire dataset through the conv base for every epoch, therefore is much slower and more computationally exensive. Since we have a GPU we're going with option two to benefit from data augmentation.
 
-conv_base = VGG16(weights='imagenet',
-                  include_top=False,
-                  input_shape=input_shape)
+conv_base = transfer_model(weights='imagenet',
+                           include_top=False,
+                           input_shape=input_shape)
 
 conv_base.summary()
 
 model = keras.Sequential()
 model.add(conv_base)
 model.add(layers.Flatten())
+model.add(layers.Dropout(0.2))
 model.add(layers.Dense(128, activation='relu'))
 model.add(layers.Dense(14, activation='softmax'))
 
 conv_base.trainable = False
 model.summary()
 
-optimiser = keras.optimizers.Adam(learning_rate=0.0005)
+optimiser = keras.optimizers.Adam(learning_rate=0.001)
 model.compile(loss='categorical_crossentropy',
               optimizer=optimiser,
               metrics=["accuracy"])
 
-clf = model.fit_generator(train_generator,
-                          steps_per_epoch=steps_per_train_epoch,
-                          epochs=100,
-                          validation_data=test_generator,
-                          validation_steps=steps_per_val_epoch)
+clf = model.fit(train_generator,
+                steps_per_epoch=steps_per_train_epoch,
+                epochs=2,
+                validation_data=test_generator,
+                validation_steps=steps_per_val_epoch)
+
+metrics_dict = n_retraining_datagen(model=model, 
+                                    n=2, 
+                                    train_generator=train_generator,
+                                    val_generator=test_generator,
+                                    epochs=num_epochs,
+                                    batch_size=batch_size,
+                                    transfer_model=True)
+
+#smoothing the output of the metrics dictionary ready for analysis and plotting
+metrics_dict_smooth = copy.deepcopy(metrics_dict)
+for key in metrics_dict_smooth:
+    metrics_dict_smooth[key] = smooth_filter(metrics_dict_smooth[key], 3)
+
+#printing validation accuracy information to the console
+max_accuracy = np.nanmax(metrics_dict_smooth['val_acc_mean'])
+max_accuracy_epoch = list(metrics_dict_smooth['val_acc_mean']).index(max_accuracy)
+max_accuracy = round((np.nanmax(metrics_dict_smooth['val_acc_mean'])), 3) * 100
+print(f'\nMax accuracy of {max_accuracy}% achieved after {max_accuracy_epoch} epochs\n')
 
 
 #------------------------------- MODEL PERFORMANCE ----------------------------
 
 #--------- TRAINING & VALIDATION LOSS ---------
 
-#setting up plottable variables
-history_dict = clf.history
-loss_values = history_dict['loss']
-val_loss = history_dict['val_loss']
-epochs = list(range(1, len(loss_values)+1))
+epochs = list(range(1, num_epochs+1))
 
 #fig setup including twin axis
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss VGG16 Transfer Convnet', y=0.95, fontsize=14, fontweight='bold')
+fig.suptitle('Training & Validation Loss Xception Transfer Model', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
-ax.plot(epochs, loss_values, 'b', label='Training Loss')
-ax.plot(epochs, val_loss, 'r', label='Validation Loss')
-ax.axhline(min(val_loss), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
+ax.plot(epochs, metrics_dict_smooth['train_loss_mean'], 'b', label='Training Loss')
+ax.plot(epochs, metrics_dict_smooth['val_loss_mean'], 'r', label='Validation Loss')
+ax.plot(epochs, metrics_dict_smooth['val_loss_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict_smooth['val_loss_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict_smooth['val_loss_std_p'], metrics_dict_smooth['val_loss_std_n'], color='grey', alpha=0.15)
+ax.axhline(np.nanmin(metrics_dict_smooth['val_loss_mean']), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
-#setting axis limits
-ax.set_ylim([min(loss_values)-0.25, min(loss_values)+1.75])
-
-#plotting legend
-ax.legend()
-
-#plotting axis labels
+#setting axis limits, labels and legend
+ax.set_ylim([np.nanmin(metrics_dict_smooth['train_loss_mean'])-0.25, np.nanmax(metrics_dict_smooth['val_loss_mean'])+1.75])
 ax.set_xlabel('Epochs')
 ax.set_ylabel('Loss')
+ax.legend()
 
 #--------- TRAINING & VALIDATION ACCURACY ---------
 
-#setting up plottable variables
-accuracy_values = history_dict['accuracy']
-val_accuracy = history_dict['val_accuracy']
-
-#fig setup including twin axis
+#fig setup
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy VGG16 Transfer Convnet', y=0.95, fontsize=14, fontweight='bold')
+fig2.suptitle('Training & Validation Accuracy Xception Transfer Model', y=0.95, fontsize=14, fontweight='bold')
 
-#plotting training and validation loss
-ax.plot(epochs, accuracy_values, 'b', label='Training Accuracy')
-ax.plot(epochs, val_accuracy, 'r', label='Validation Accuracy')
-ax.axhline(max(val_accuracy), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
+#plotting training and validation accuracy
+ax.plot(epochs, metrics_dict_smooth['train_acc_mean'], 'b', label='Training Accuracy')
+ax.plot(epochs, metrics_dict_smooth['val_acc_mean'], 'r', label='Validation Accuracy')
+ax.plot(epochs, metrics_dict_smooth['val_acc_std_p'], label='_nolegend_', alpha=0)
+ax.plot(epochs, metrics_dict_smooth['val_acc_std_n'], label='_nolegend_', alpha=0)
+ax.fill_between(epochs, metrics_dict_smooth['val_acc_std_p'], metrics_dict_smooth['val_acc_std_n'], color='grey', alpha=0.15)
+
+#plotting accuracy lines
+ax.axhline(np.nanmax(metrics_dict_smooth['val_acc_mean']), c='r', alpha=0.3, ls='dashed', label='Max Validation Accuracy')
 ax.axhline(1/14, c='k', alpha=0.3, ls='dashed', label='Random Guess Accuracy')
 
-#setting axis limits
-ax.set_ylim([0,max(accuracy_values)+0.1])
-
-#plotting legend
+#plotting legend and setting limits
 ax.legend()
 ax.set(xlabel='Epochs',
        ylabel='Accuracy');
+ax.set_ylim([0,np.nanmax(metrics_dict_smooth['train_acc_mean'])+0.1])
 
 
 # ----------------------------------- END -------------------------------------

@@ -99,7 +99,7 @@ The last step to improve this model was through introducing data augmentation to
 
 <br>
 
-The architecture of the model remains the same as the previous. As before, input image sizes were tested as an important hyperparameter, with 64 * 64 yielding highest accuracy. This is a trade-off between retaining as much information stored in the original image whilst keeping the number of trainable parameters in the model to a minimum. This stage resulted in a good increase in accuracy to 42% as shown in figure 7. 
+The architecture of the model remains the same as the previous. As before, input image sizes were tested as an important hyperparameter, with 64 * 64 yielding highest accuracy. This is a trade-off between retaining as much information stored in the original image whilst keeping the number of trainable parameters in the model to a minimum. This stage resulted in a significant increase in accuracy to 42% as shown in figure 7. 
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/5_basic_convnet_aug_v2.png" alt="Figure 7">
 

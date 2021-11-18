@@ -53,8 +53,7 @@ def smooth_filter(y, box_pts, set_nan=True):
     return y_smooth
 
 
-
-def reset_weights(model):
+def reset_weights(model, transfer_model=False):
     '''
     Re-intantiates a keras model with random weights
 
@@ -62,10 +61,15 @@ def reset_weights(model):
     ----------
     model : tf.keras.model
         Keras model of dense or convolutional layers. Not tested on other layer types
+    transfer_model : bool, optional
+        Setting this to true will skip the resetting of the first layer, usualy the convolutional base of a model which you do not want to reset when applying transfer learning. The default is False.
 
     '''
     
-    for layer in model.layers: 
+    for i, layer in enumerate(model.layers): 
+        if transfer_model:
+            if i==0:
+                continue
         if isinstance(layer, tf.keras.Model):
             reset_weights(layer)
             continue
@@ -460,7 +464,7 @@ def n_retraining(model, n, train_data, train_labels, val_data, val_labels, smoot
     return metrics_dict
 
 
-def n_retraining_datagen(model, n, train_generator, val_generator, smooth=False, s=3, epochs=100, batch_size=32): 
+def n_retraining_datagen(model, n, train_generator, val_generator, smooth=False, s=3, epochs=100, batch_size=32, transfer_model=False): 
     '''
     Retrains a model n times, randomly instantiating the model with weights on each iteration to attain more robust model performance metrics
 
@@ -482,7 +486,9 @@ def n_retraining_datagen(model, n, train_generator, val_generator, smooth=False,
         number of epochs for model training. The default is 100.
     batch_size : int, optional
         batch size per iteration. The default is 32.
-
+    transfer_model : bool, optional
+        Setting this to true will skip the resetting the weights of the first layer, usualy the convolutional base of a model which you do not want to reset when applying transfer learning. The default is False.
+        
     Returns
     -------
     metrics_dict : dictionary 
@@ -498,7 +504,7 @@ def n_retraining_datagen(model, n, train_generator, val_generator, smooth=False,
 
     for _ in range(n):
         
-        reset_weights(model)
+        reset_weights(model, transfer_model=transfer_model)
         
         steps_per_train_epoch = train_generator.__len__()
         steps_per_val_epoch = val_generator.__len__()

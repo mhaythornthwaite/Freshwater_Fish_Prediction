@@ -40,7 +40,7 @@ image_size = (299, 299)
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
-num_epochs = 5
+num_epochs = 100
 transfer_model = Xception #select from here: https://keras.io/api/applications/
 
 train_dir = 'data_for_generator/train_data'
@@ -103,7 +103,7 @@ model.add(layers.Dense(14, activation='softmax'))
 conv_base.trainable = False
 model.summary()
 
-optimiser = keras.optimizers.Adam(learning_rate=0.001)
+optimiser = keras.optimizers.Adam(learning_rate=0.0005)
 model.compile(loss='categorical_crossentropy',
               optimizer=optimiser,
               metrics=["accuracy"])
@@ -115,7 +115,7 @@ clf = model.fit(train_generator,
                 validation_steps=steps_per_val_epoch)
 
 metrics_dict = n_retraining_datagen(model=model, 
-                                    n=2, 
+                                    n=10, 
                                     train_generator=train_generator,
                                     val_generator=test_generator,
                                     epochs=num_epochs,
@@ -153,7 +153,7 @@ ax.fill_between(epochs, metrics_dict_smooth['val_loss_std_p'], metrics_dict_smoo
 ax.axhline(np.nanmin(metrics_dict_smooth['val_loss_mean']), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
 #setting axis limits, labels and legend
-ax.set_ylim([np.nanmin(metrics_dict_smooth['train_loss_mean'])-0.25, np.nanmax(metrics_dict_smooth['val_loss_mean'])+1.75])
+ax.set_ylim([np.nanmin(metrics_dict_smooth['train_loss_mean'])-0.25, np.nanmax(metrics_dict_smooth['val_loss_mean'])+0.65])
 ax.set_xlabel('Epochs')
 ax.set_ylabel('Loss')
 ax.legend()
@@ -186,4 +186,3 @@ ax.set_ylim([0,np.nanmax(metrics_dict_smooth['train_acc_mean'])+0.1])
 
 print('\n', 'Script runtime:', round(((time.time()-start)/60), 2), 'minutes')
 print(' ----------------- END ----------------- \n')
-

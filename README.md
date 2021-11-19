@@ -33,7 +33,7 @@
 
 ## Aims and Objectives
 
-The objective of this study was to train a network that could identify species of British freshwater fish on RGB images. The image may contain anything (people, animals etc.) providing there is only one species of fish present. No set accuracy is defined for success, rather the study aims to understand what can be achieved with limited data and the best approach to take in this scenario.
+The objective of this study is to train a network that can identify species of British freshwater fish on RGB images. The image may contain anything (people, animals etc.) providing there is only one species of fish present. No set accuracy is defined for success, rather the study aims to understand what can be achieved with limited data and the best approach to take in this scenario.
 
 
 ## Data Collection & Preparation
@@ -60,7 +60,7 @@ In order to achieve the project aims, numerous models of increasing complexity w
 
 ### Multilayer Perceptron
 
-To begin with the most basic approach was taken, training a simple multilayer perceptron. Images were resampled to 32 * 32 with a single black-white channel, before being vectorised ready for input into the model. A small image size was chosen in an attempt to reduce the number of trainable parameters. Identifying fish species with the human eye was difficult, but not impossible, in most cases a reasonable guess could be made. 
+To begin with the most basic approach was taken, training a simple multilayer perceptron. Images were resampled to 32 * 32 with a single black-white channel, before being vectorised ready for input into the model. A small image size was chosen in an attempt to reduce the number of trainable parameters. Identifying fish species with the human eye at this resolution is difficult, but not impossible, in most cases a reasonable guess could be made. 
 
 The final model comprised of three fully connected hidden layers, all with a relu activation function except the output layer which has a softmax activation. Training was completed in batch sizes of 32, using <a href="https://keras.io/api/losses/probabilistic_losses/#categoricalcrossentropy-class" target="_blank"> categorical crossentropy</a> and an <a href="https://keras.io/api/optimizers/adam/" target="_blank"> adam</a> optimiser. 
 
@@ -75,15 +75,15 @@ The results can be studied in figure 3. Overfitting occurs after around 40 epoch
 
 A simple convnet was tested next. 3 convolutional layers and 2 max pooling layers form the basis of the convolutional block. This is then flattened and connected to 2 dense layers for classification.
 
-Images were resampled to various sizes for training however, the original 32 * 32 resolution resulted in highest accuracy and least overfitting. As seen in figure 4, using a convolutional architecture results in a doubling of accuracy to 19%. 
+Images were resampled to various sizes for training however, the original 32 * 32 resolution resulted in the highest accuracy and least overfitting. As seen in figure 4, using a convolutional architecture produces a doubling of accuracy vompared to an MLP to 19%. 
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4a_basic_convnet.png" alt="Figure 4">
 
-<em>Figure 4. (a) Results averaged from 10 models trained with random weights initialisation. Grey shade shows one standard deviation around the validation accuracy. Validation accuracy rises to 19% after 90 epochs. (b) Grey shade shows one standard deviation around the validation loss. Overfitting of the loss function on the validation data appears after around 20 epochs. Note that the validation loss for the first epoch is lower than the training loss. This is because training loss is measured during each epoch whereas validation loss is measured after. </em>
+<em>Figure 4. (a) Results averaged from 10 models trained with random weights initialisation. Grey shade shows one standard deviation around the validation accuracy. Validation accuracy rises to 19% after 90 epochs. (b) Grey shade shows one standard deviation around the validation loss. Overfitting of the loss function on the validation data appears after around 20 epochs. Note that the validation loss for the first epoch is lower than the training loss. This is likely because training loss is measured during each epoch whereas validation loss is measured after. </em>
 
 <br>
 
-In an attempt to reduce the overfitting in this model, L2 regularisation was added to the loss function, and a modest dropout layer (rate = 0.2) added to the model after flattening. Accuracy remains roughly the same, increasing slightly to 20%. We do however, see a decrease in overfitting apparent in the validation loss, seen in figure 5.
+To reduce the overfitting in this model, L2 regularisation was added to the loss function, and a modest dropout layer (rate = 0.2) added to the model after flattening. Accuracy remains roughly the same, increasing slightly to 20%. We do however, see a decrease in overfitting apparent in the validation loss, seen in figure 5.
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/4b_basic_convnet_reg.png" alt="Figure 5">
 
@@ -91,15 +91,15 @@ In an attempt to reduce the overfitting in this model, L2 regularisation was add
 
 <br>
 
-The last step to improve this model was through introducing data augmentation to the training dataset. When a batch is being 'assembled' ready for training, each image is allowed to rotate, shift position, zoom, shear and or flip. In each epoch the model is exposed to a different version of every image used in training, helping the model to generalise better and prevent overfitting. As a result, the model will be better equipped to identify fish species irrespective of the relative size or rotation of the target. An example of data augmentation on a single training image can be seen in figure 6. 
+The last step to improve this model was through introducing data augmentation to the training dataset. When a batch is being 'assembled' ready for training, each image is allowed to rotate, shift position, zoom, shear and or flip. In each epoch the model is exposed to a different version of every image used in training, helping the model to generalise better and prevent overfitting.Therefore, the model will be better equipped to identify fish species irrespective of the relative size or rotation of the target. An example of data augmentation on a single training image can be seen in figure 6. 
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//data_aug_combined.png" alt="Figure 6">
 
-<em>Figure 6. (a) Data augmentation on a single high-resolution image (512 * 512) (b) Data augmentation on the same image but with a resolution of 64 * 64 used for training. </em>
+<em>Figure 6. (a) Data augmentation on a single high-resolution image (512 * 512) (b) Data augmentation on the same image reduced to 64 * 64 used for training. </em>
 
 <br>
 
-The architecture of the model remains the same as the previous. As before, input image sizes were tested as an important hyperparameter, with 64 * 64 yielding highest accuracy. This is a trade-off between retaining as much information stored in the original image whilst keeping the number of trainable parameters in the model to a minimum. This stage resulted in a significant increase in accuracy to 42% as shown in figure 7. 
+The architecture of the model remains the same as the previous. As before, input image sizes were tested as an important hyperparameter, with 64 * 64 yielding the highest accuracy. This is a trade-off between retaining as much information stored in the original image, whilst keeping the number of trainable parameters in the model to a minimum. This stage resulted in a significant increase in accuracy to 42% as shown in figure 7. 
 
 <img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/5_basic_convnet_aug.png" alt="Figure 7">
 

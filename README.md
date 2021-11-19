@@ -108,9 +108,12 @@ The architecture of the model remains the same as the previous. As before, input
 
 ### Transfer Xception Network
 
+Next, an alternative approach is taken using transfer learning. In this architecture, a pre-trained convolutional base has been connected to a flatten, dropout and two trainable dense layers for classification. Various different pretrained networks <a href="https://keras.io/api/applications/" target="_blank">available through keras</a> were tested as the base, with xception chosen due to high model performance. As before, various input resolutions were tested, with the default image size for this base (299 * 299) selected. Using this configuration, we see a significant increase in validation accuracy compared to all previous models presented in this study, a rise to 72% as seen in figure 8. Much higher image resolutions are possible with this architecture because there are only two trainable dense layers. The untrainable convolutional base also likely generalises well to the problem of fish identification due to similarities in the <a href="https://deeplearning.cms.waikato.ac.nz/user-guide/class-maps/IMAGENET/" target="_blank"> classes </a> of the imagenet database which it was trained on (already contains several classes of saltwater fish).
 
 
+<img src="https://raw.githubusercontent.com/mhaythornthwaite/Freshwater_Fish_Prediction/master/figures//combined_figures_for_report/6_xception.png" alt="Figure 8">
 
+<em>Figure 8. (a) Results averaged from 10 models trained with random weights initialisation in the trainable layers. Grey shade shows one standard deviation around the validation accuracy. Validation accuracy rises to 72% after 100 epochs. (b) Grey shade shows one standard deviation around the validation loss. We see no inflection in this loss, suggesting we have little overfitting. </em>
 
 ## Further Work and Improvements
 

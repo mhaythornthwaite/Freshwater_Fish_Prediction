@@ -47,11 +47,12 @@ with open('data_labels/label_paths', 'rb') as myFile:
     
 #------------------------------- INPUT VARIABLES ------------------------------
 
-image_size = (32, 32)
+image_size = (128, 128)
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
 num_epochs = 100
+model = 'complex'
 
 image_vector_len = image_size[0] * image_size[1]
 num_images = len(labels)
@@ -72,7 +73,25 @@ train_images, test_images, train_labels, test_labels = train_test_split(data_arr
 
 #---------------------------------- MODEL BUILD -------------------------------
 
-model = keras.Sequential([
+if model=='complex':
+    model = keras.Sequential([
+    layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(128, (3,3), activation='relu'),
+    layers.Conv2D(128, (3,3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(256, (3,3), activation='relu'),
+    layers.Conv2D(256, (3,3), activation='relu'), 
+    layers.GlobalAveragePooling2D(),
+    layers.Dropout(0.2),
+    layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
+    layers.Dense(14, activation='softmax')
+    ])
+if model=='simple':
+    model = keras.Sequential([
     layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
     layers.MaxPooling2D((2, 2)),
     layers.Conv2D(64, (3,3), activation='relu'),
@@ -83,6 +102,9 @@ model = keras.Sequential([
     layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
     layers.Dense(14, activation='softmax')
     ])
+else:
+    print('Please select either a simple or complex model')
+
 
 optimiser = keras.optimizers.Adam(learning_rate=0.0001)
 model.compile(loss='categorical_crossentropy',

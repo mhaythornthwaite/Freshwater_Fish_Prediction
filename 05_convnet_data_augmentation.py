@@ -42,7 +42,15 @@ with open('data_labels/label_paths', 'rb') as myFile:
 
 #------------------------------- INPUT VARIABLES ------------------------------
 
-image_size = (64, 64)
+model = 'complex' #select 'complex' or 'simple'
+
+if model == 'complex':
+    image_size = (224, 224)
+elif model == 'simple':
+    image_size = (64, 64)
+else:
+    print('Please select either a simple or complex model')
+
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
@@ -94,48 +102,57 @@ steps_per_val_epoch = test_generator.__len__()
 
 #plotting data augmentation with high resolution
 im = plt.imread(label_paths[22])
-im = cv2.resize(im, dsize=(512,512), interpolation=cv2.INTER_CUBIC)
+im = cv2.resize(im, dsize=(224,224), interpolation=cv2.INTER_CUBIC)
 
-fig, ((ax1, ax2),(ax3, ax4)) = plt.subplots(ncols=2,
-                                            nrows=2,
-                                            figsize=(10,12))
+fig, ((ax1, ax2, ax3, ax4)) = plt.subplots(ncols=4,
+                                            nrows=1,
+                                            figsize=(20,6))
 ax1.imshow(train_datagen.random_transform(im))
 ax2.imshow(train_datagen.random_transform(im))
 ax3.imshow(train_datagen.random_transform(im))
 ax4.imshow(train_datagen.random_transform(im))
 
-fig.suptitle('Data Augmentation Example: High Resolution', y=0.95, fontsize=22, fontweight='bold')
+fig.suptitle('Data Augmentation Example', y=0.85, fontsize=22, fontweight='bold')
 
-
-#plotting data augmentation with low resolution
-im = plt.imread(label_paths[22])
-im = cv2.resize(im, dsize=(64,64), interpolation=cv2.INTER_CUBIC)
-
-fig, ((ax1, ax2),(ax3, ax4)) = plt.subplots(ncols=2,
-                                            nrows=2,
-                                            figsize=(10,12))
-ax1.imshow(train_datagen.random_transform(im))
-ax2.imshow(train_datagen.random_transform(im))
-ax3.imshow(train_datagen.random_transform(im))
-ax4.imshow(train_datagen.random_transform(im))
-
-fig.suptitle('Data Augmentation Example: Low Resolution', y=0.95, fontsize=22, fontweight='bold')
 
 
 #---------------------------------- MODEL BUILD -------------------------------
 
-model = keras.Sequential()
-model.add(layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape))
-model.add(layers.MaxPooling2D((2, 2)))
-model.add(layers.Conv2D(64, (3,3), activation='relu'))       
-model.add(layers.MaxPooling2D((2, 2)))
-model.add(layers.Conv2D(64, (3,3), activation='relu'))
-model.add(layers.Flatten())
-model.add(layers.Dropout(0.2))
-model.add(layers.Dense(64, activation='relu'))
-model.add(layers.Dense(14, activation='softmax'))
 
-optimiser = keras.optimizers.Adam(learning_rate=0.001)
+if model=='complex':
+    model = keras.Sequential([
+    layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(128, (3,3), activation='relu'),
+    layers.Conv2D(128, (3,3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(256, (3,3), activation='relu'),
+    layers.Conv2D(256, (3,3), activation='relu'), 
+    layers.GlobalAveragePooling2D(),
+    layers.Dropout(0.2),
+    layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
+    layers.Dense(14, activation='softmax')
+    ])
+if model=='simple':
+    model = keras.Sequential([
+    layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.Flatten(),
+    layers.Dropout(0.2),
+    layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
+    layers.Dense(14, activation='softmax')
+    ])
+else:
+    print('Please select either a simple or complex model')
+
+
+optimiser = keras.optimizers.Adam(learning_rate=0.0003)
 model.compile(loss='categorical_crossentropy',
               optimizer=optimiser,
               metrics=["accuracy"])

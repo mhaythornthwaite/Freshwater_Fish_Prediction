@@ -47,12 +47,19 @@ with open('data_labels/label_paths', 'rb') as myFile:
     
 #------------------------------- INPUT VARIABLES ------------------------------
 
-image_size = (128, 128)
+model = 'complex' #select 'complex' or 'simple'
+
+if model == 'complex':
+    image_size = (224, 224)
+elif model == 'simple':
+    image_size = (32, 32)
+else:
+    print('Please select either a simple or complex model')
+
 input_shape = image_size + (3,)
 batch_size = 32
 num_classes = 14
-num_epochs = 100
-model = 'complex'
+num_epochs = 150
 
 image_vector_len = image_size[0] * image_size[1]
 num_images = len(labels)
@@ -90,7 +97,7 @@ if model=='complex':
     layers.Dense(64, kernel_regularizer=regularizers.l2(0.001), activation='relu'),
     layers.Dense(14, activation='softmax')
     ])
-if model=='simple':
+elif model=='simple':
     model = keras.Sequential([
     layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
     layers.MaxPooling2D((2, 2)),
@@ -150,7 +157,7 @@ print(f'\nMax accuracy of {max_accuracy}% achieved after {max_accuracy_epoch} ep
 
 #fig setup
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss Basic CNN + Regularization', y=0.95, fontsize=14, fontweight='bold')
+fig.suptitle('Training & Validation Loss Deeper CNN', y=0.95, fontsize=14, fontweight='bold')
 epochs = list(range(1, num_epochs+1))
 
 #plotting training and validation loss
@@ -162,7 +169,7 @@ ax.fill_between(epochs, metrics_dict_smooth['val_loss_std_p'], metrics_dict_smoo
 ax.axhline(np.nanmin(metrics_dict_smooth['val_loss_mean']), c='r', alpha=0.3, ls='dashed', label='Min Validation Loss')
 
 #setting axis limits, labels and legend
-ax.set_ylim([np.nanmin(metrics_dict_smooth['train_loss_mean'])-0.5, np.nanmin(metrics_dict['train_loss_mean'])+8])
+ax.set_ylim([np.nanmin(metrics_dict_smooth['train_loss_mean'])-0.5, np.nanmin(metrics_dict['train_loss_mean'])+4])
 ax.set_xlabel('Epochs')
 ax.set_ylabel('Loss')
 ax.legend()
@@ -171,7 +178,7 @@ ax.legend()
 
 #fig setup
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy Basic CNN + Regularization', y=0.95, fontsize=14, fontweight='bold')
+fig2.suptitle('Training & Validation Accuracy Deeper CNN', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation accuracy
 ax.plot(epochs, metrics_dict_smooth['train_acc_mean'], 'b', label='Training Accuracy')

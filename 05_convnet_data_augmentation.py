@@ -176,7 +176,7 @@ metrics_dict = n_retraining_datagen(model=model,
 #smoothing the output of the metrics dictionary ready for analysis and plotting
 metrics_dict_smooth = copy.deepcopy(metrics_dict)
 for key in metrics_dict_smooth:
-    metrics_dict_smooth[key] = smooth_filter(metrics_dict_smooth[key], 3)
+    metrics_dict_smooth[key] = smooth_filter(metrics_dict_smooth[key], 7)
 
 #printing validation accuracy information to the console
 max_accuracy = np.nanmax(metrics_dict_smooth['val_acc_mean'])
@@ -193,7 +193,7 @@ epochs = list(range(1, num_epochs+1))
 
 #fig setup including twin axis
 fig, ax = plt.subplots()
-fig.suptitle('Training & Validation Loss Basic CNN + Augmentation', y=0.95, fontsize=14, fontweight='bold')
+fig.suptitle('Loss - Deep CNN & Augmentation', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation loss
 ax.plot(epochs, metrics_dict_smooth['train_loss_mean'], 'b', label='Training Loss')
@@ -213,7 +213,7 @@ ax.legend()
 
 #fig setup
 fig2, ax = plt.subplots()
-fig2.suptitle('Training & Validation Accuracy Basic CNN + Augmentation', y=0.95, fontsize=14, fontweight='bold')
+fig2.suptitle('Accuracy - Deep CNN & Augmentation', y=0.95, fontsize=14, fontweight='bold')
 
 #plotting training and validation accuracy
 ax.plot(epochs, metrics_dict_smooth['train_acc_mean'], 'b', label='Training Accuracy')
